@@ -145,7 +145,7 @@ class LeadsController extends Controller
         'purpose' => $request->purpose,
         'remarks' => $request->remarks,
         'assigned_to_remarks' => $request->assigned_to_remarks,
-        'last_updated_by' => auth()->id(), 
+        'last_updated_by' => auth()->id(),
 
     ]);
 
