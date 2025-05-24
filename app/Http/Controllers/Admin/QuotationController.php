@@ -151,6 +151,8 @@ class QuotationController extends Controller
         //
     }
 
+
+
 public function sendQuotationEmail($leadId)
     {
         // dd($leadId);
@@ -186,127 +188,113 @@ public function sendQuotationEmail($leadId)
     }
 
 
-    public function sendWhatsappQuotation($lead, $pdfPath)
-    {
-$accessToken = env('INTERAKT_API_KEY'); // from .env
-$fileName = "quotation_{$lead->id}.pdf";
 
-// Format mobile number
-$phoneNumber = $lead->mobile;
-if (!str_starts_with($phoneNumber, '+')) {
-    $phoneNumber = '+91' . ltrim($phoneNumber, '0');
-}
-
-// Make sure file exists in public storage
-$publicPath = "public/{$fileName}";
-if (!Storage::exists($publicPath)) {
-    Storage::put($publicPath, file_get_contents($pdfPath));
-}
-
-// Get public URL of the file
-$fileUrl = asset("storage/{$fileName}"); // e.g. https://yourdomain.com/storage/quotation_123.pdf
-
-// WhatsApp message template payload
-$payload = [
-    "fullPhoneNumber" => $phoneNumber,
-    "type" => "Template",
-    "template" => [
-        "name" => "quotation_pdf", // ✅ Replace with your approved Interakt template name
-        "languageCode" => "en_US",
-        "headerValues" => [
-            [
-                "type" => "document",
-                "media" => [
-                    "url" => $fileUrl,
-                    "filename" => "Quotation.pdf"
-                ]
-            ]
-        ],
-        "bodyValues" => [$lead->name] // maps to {{1}} in Interakt template body
-    ],
-    "callbackData" => "Quotation_Sent"
-];
-
-// Send to Interakt
-$response = Http::withHeaders([
-    'Authorization' => "Basic {$accessToken}",
-    'Content-Type' => 'application/json',
-])->post('https://api.interakt.ai/v1/public/message/', $payload);
-
-\Log::info("Interakt Payload", $payload);
-\Log::info("Interakt Response", [
-    'status' => $response->status(),
-    'body' => $response->body()
-]);
-
-if ($response->failed()) {
-    return response()->json(['error' => 'Failed to send WhatsApp message'], 500);
-}
-
-return response()->json(['success' => 'WhatsApp message sent']);
-}
 
 // public function sendWhatsappQuotation($lead, $pdfPath)
 // {
-//     $accessToken = env('INTERAKT_API_KEY'); // Set this in .env
+//     $accessToken = env('INTERAKT_API_KEY');
+
+//     // Format phone number
 //     $phoneNumber = $lead->mobile;
-
-//     // Format mobile number (add +91 if missing)
 //     if (!str_starts_with($phoneNumber, '+')) {
-//         $phoneNumber = '+91' . ltrim($phoneNumber, '0');
+//         $phoneNumber = ltrim($phoneNumber, '0'); // Remove leading zero
 //     }
 
-//     // Store file in public path if not already present
-//     $fileName = "quotation_{$lead->id}.pdf";
-//     $publicStoragePath = "public/{$fileName}";
-
-//     if (!Storage::exists($publicStoragePath)) {
-//         Storage::put($publicStoragePath, file_get_contents($pdfPath));
+//     // Store PDF in public folder if not exists
+//     $publicPath = "public/quotation_{$lead->id}.pdf";
+//     if (!Storage::exists($publicPath)) {
+//         Storage::put($publicPath, file_get_contents($pdfPath));
 //     }
 
-//     // Get public file URL
-//     $fileUrl = asset("storage/{$fileName}"); // e.g., https://yourdomain.com/storage/quotation_1.pdf
+//     $fileUrl = asset("storage/quotation_{$lead->id}.pdf");
 
-//     // Prepare Interakt payload
-//     $payload = [
-//         "fullPhoneNumber" => $phoneNumber,
-//         "type" => "Template",
-//         "template" => [
-//             "name" => "quotation_pdf", // WhatsApp approved template
-//             "languageCode" => "en_US",
-//             "headerValues" => [
-//                 [
-//                     "type" => "document",
-//                     "media" => [
-//                         "url" => $fileUrl,
-//                         "filename" => "Quotation.pdf"
-//                     ]
-//                 ]
-//             ],
-//             "bodyValues" => [$lead->name]
-//         ],
-//         "callbackData" => "Quotation_Sent"
-//     ];
+//     // Compose message
+//     $message = "Hello {$lead->name} ({$lead->email}),\nPlease find the attached quotation.";
 
-//     // Send to Interakt API
+//     // Payload for Interakt API
+// $payload = [
+//     "countryCode" => "91",
+//     "phoneNumber" => $phoneNumber,
+//     "callbackData" => "Quotation_Sent",
+//     "type" => "Document", // Must be capital "D"
+//     "data" => [
+//         "url" => $fileUrl,
+//         "mediaUrl" => $fileUrl,
+//         "caption" => $message,
+//         "fileName" => "Quotation_{$lead->id}.pdf"
+//     ]
+// ];
+
+//     // Send the request
 //     $response = Http::withHeaders([
 //         'Authorization' => "Basic {$accessToken}",
 //         'Content-Type' => 'application/json',
 //     ])->post('https://api.interakt.ai/v1/public/message/', $payload);
 
-//     // Log the result
-//     \Log::info("Interakt Payload", $payload);
-//     \Log::info("Interakt Response", ['status' => $response->status(), 'body' => $response->body()]);
-
-//     // Optionally return response or handle errors
-//     if ($response->failed()) {
-//         \Log::error("WhatsApp message failed for Lead ID {$lead->id}");
+//     // Optional: log or check result
+//     if ($response->successful()) {
+//         \Log::info('WhatsApp message sent for lead ID: ' . $lead->id);
+//     } else {
+//         \Log::error('Failed to send WhatsApp message: ' . $response->body());
 //     }
+
+//     dd($response->status(), $response->body()); // Debugging
+
+//     return $response->json();
 // }
 
+public function sendWhatsappQuotation($lead, $pdfPath)
+{
+    $accessToken = env('INTERAKT_API_KEY');
 
+    // Format phone number (remove leading zero, no +)
+    $phoneNumber = ltrim($lead->mobile, '0');
 
+    // Store the PDF publicly (if not already)
+    $publicPath = "public/quotation_{$lead->id}.pdf";
+    if (!Storage::exists($publicPath)) {
+        Storage::put($publicPath, file_get_contents($pdfPath));
+    }
 
+    // Public URL to file
+    $fileUrl = asset("storage/quotation_{$lead->id}.pdf");
+
+    // Compose message
+    $message = "Hello {$lead->name} ({$lead->email}),\nPlease find the attached quotation.";
+
+    // Prepare payload
+    $payload = [
+        "countryCode" => "91",
+        "phoneNumber" => $phoneNumber,
+        "callbackData" => "Quotation_Sent",
+        "type" => "Document", // Capital "D" is important
+        "data" => [
+            "url" => $fileUrl,                     // Required public URL
+            "mediaUrl" => $fileUrl,               // Required again as per Interakt spec
+            "caption" => $message,                // Optional message
+            "fileName" => "Quotation_{$lead->id}.pdf"  // Optional file name
+        ]
+    ];
+
+    // Send the request to Interakt
+    $response = Http::withHeaders([
+        'Authorization' => "Basic {$accessToken}",
+        'Content-Type' => 'application/json',
+    ])->post('https://api.interakt.ai/v1/public/message/', $payload);
+
+    // Handle response
+    if ($response->successful()) {
+        \Log::info("✅ WhatsApp quotation sent to {$lead->mobile} (Lead ID: {$lead->id})");
+    } else {
+        \Log::error("❌ WhatsApp send failed: " . $response->body());
+    }
+
+    // Debug only: remove in production
+    dd($response->status(), $response->body());
+
+    // Optionally return response
+    // return $response->json();
+}
 
 
 
@@ -316,38 +304,30 @@ return response()->json(['success' => 'WhatsApp message sent']);
 //     $accessToken = env('INTERAKT_API_KEY');
 //     $phoneNumber = $lead->mobile;
 
+//     // Format phone number
 //     if (!str_starts_with($phoneNumber, '+')) {
 //         $phoneNumber = '+91' . ltrim($phoneNumber, '0');
 //     }
 
-//     // Ensure file is saved in public storage
+//     // Save file to public storage if it doesn't exist
 //     $publicPath = "public/quotation_{$lead->id}.pdf";
 //     if (!Storage::exists($publicPath)) {
 //         Storage::put($publicPath, file_get_contents($pdfPath));
 //     }
 
-//     // Use correct asset path for public PDF URL
-//     $fileUrl = asset("storage/quotation_{$lead->id}.pdf"); // ✅ This must be publicly accessible
+//     $fileUrl = asset("storage/quotation_{$lead->id}.pdf");
 
-//     // Prepare payload
+//     // Build the payload for Interakt document message
 //     $payload = [
-//         "fullPhoneNumber" => $phoneNumber,
-//         "type" => "Template",
-//         "template" => [
-//             "name" => "quotation_pdf",
-//             "languageCode" => "en_US",
-//             "headerValues" => [
-//                 [
-//                     "type" => "document",
-//                     "media" => [
-//                         "url" => $fileUrl,
-//                         "filename" => "Quotation.pdf"
-//                     ]
-//                 ]
-//             ],
-//             "bodyValues" => [$lead->name]
-//         ],
-//         "callbackData" => "Quotation_Sent"
+//         "countryCode" => "91",
+//         "phoneNumber" => ltrim($lead->mobile, '0'),
+//         "callbackData" => "Quotation_Sent",
+//         "type" => "document",
+//         "data" => [
+//             "url" => $fileUrl,
+//             "mediaUrl" => "quotation_{$lead->id}.pdf",
+//             "caption" => "Please find the quotation attached for your reference."
+//         ]
 //     ];
 
 //     // Send request
@@ -356,59 +336,10 @@ return response()->json(['success' => 'WhatsApp message sent']);
 //         'Content-Type' => 'application/json',
 //     ])->post('https://api.interakt.ai/v1/public/message/', $payload);
 
-//     // Log result
-//     \Log::info("Interakt Payload", $payload);
-//     \Log::info("Interakt Response", ['status' => $response->status(), 'body' => $response->body()]);
+//     dd($response->status(), $response->body()); // Debugging
 
-//     // Optional: stop here to debug
-//     dd($response->status(), $response->body());
+//     return response()->json(['success' => 'WhatsApp message sent']);
 // }
-
-
-
-    // public function sendWhatsappQuotation($lead, $pdfPath)
-    // {
-    //     $accessToken = env('INTERAKT_API_KEY');
-    //     $phoneNumber = $lead->mobile;
-
-    //     if (!str_starts_with($phoneNumber, '+')) {
-    //         $phoneNumber = '+91' . ltrim($phoneNumber, '0');
-    //     }
-
-    //     $publicPath = "public/quotation_{$lead->id}.pdf";
-    //     if (!Storage::exists($publicPath)) {
-    //         Storage::put($publicPath, file_get_contents($pdfPath));
-    //     }
-
-    //     // $fileUrl = asset("storage/quotation_{$lead->id}.pdf");
-    //     $fileUrl = asset("app/public/quotation_{$lead->id}.pdf");
-
-    //     // Send API request to use Template message
-    //     $response = Http::withHeaders([
-    //         'Authorization' => "Basic {$accessToken}",
-    //         'Content-Type' => 'application/json',
-    //     ])->post('https://api.interakt.ai/v1/public/message/', [
-    //         "fullPhoneNumber" => $phoneNumber,
-    //         "type" => "Template",
-    //         "template" => [
-    //             "name" => "quotation_pdf",           // Ensure this matches the approved template name
-    //             "languageCode" => "en_US",              // Ensure this matches the approved language
-    //             "headerValues" => [
-    //                 [
-    //                     "type" => "document",
-    //                     "media" => [
-    //                         "url" => $fileUrl,
-    //                         "filename" => "Quotation.pdf"
-    //                     ]
-    //                 ]
-    //             ],
-    //             "bodyValues" => [$lead->name]        // Matches {{1}} in the template body
-    //         ],
-    //         "callbackData" => "Quotation_Sent"
-    //     ]);
-
-    //     dd($response->status(), $response->body()); // For debugging
-    // }
 
 
         // export
