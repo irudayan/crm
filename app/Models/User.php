@@ -149,4 +149,12 @@ class User extends Authenticatable
         return asset('backend/images/layout_img/user_img.jpg');
 
     }
+
+    // app/Models/User.php
+
+// public function leads()
+// {
+//     return $this->hasMany(\App\Models\Leads::class, 'user_id', 'id');
+// }
+
 }

@@ -14,217 +14,473 @@ use Illuminate\Support\Facades\DB;
 
 class HomeController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $user = auth()->user();
-// $roles = $user->roles->pluck('name')->toArray();
-// dd($roles);
-            $user = auth()->user();
-            $assignedName = User::select('id', 'name')->distinct()->get();
-            //   $assignedName = User::select('id', 'name')->get();
-            $today = Carbon::today();
+        $assignedName = User::select('id', 'name')->distinct()->get();
+        $today = Carbon::today();
+        $endOfDay = Carbon::today()->endOfDay();
 
-            $today = Carbon::today(); // today 00:00:00
-            $endOfDay = Carbon::today()->endOfDay(); // today 23:59:59
+        $assignedLeadsCount = Leads::where('assigned_by_id', $user->id)->count();
+        $userCount = null;
+        $userLeadsCount = [];
 
-             // New count: Leads assigned by current user
-            $assignedLeadsCount = Leads::where('assigned_by_id', $user->id)->count();
-// dd($assignedLeadsCount);
+        if (in_array(auth()->id(), [1, 2])) {
+            $userCount = User::count();
 
-
-             // Default null values
-            $userCount = null;
-            $userLeadsCount = [];
-
-            // if (auth()->id() == 1) {
-            if (in_array(auth()->id(), [1, 2])) {
-                $userCount = User::count();
-
-                // Get all users and their total leads count
-                // $userLeadsCount = DB::table('users')
-                //     ->leftJoin('leads', 'users.id', '=', 'leads.assigned_by_id')
-                //     ->select('users.id', 'users.name', DB::raw('COUNT(leads.id) as total_leads'))
-                //     ->groupBy('users.id', 'users.name')
-                //     ->get();
-
-                $userLeadsCount = DB::table('users')
+            $userLeadsCount = DB::table('users')
                 ->leftJoin('leads', 'users.id', '=', 'leads.assigned_by_id')
                 ->select(
                     'users.id',
                     'users.name',
                     DB::raw('COUNT(leads.id) as total_leads'),
-                    DB::raw('SUM(CASE WHEN DATE(leads.created_at) = "' . Carbon::today()->format('Y-m-d') . '" THEN 1 ELSE 0 END) as today_leads')
+                    DB::raw('SUM(CASE WHEN DATE(leads.created_at) = "' . Carbon::today()->format('Y-m-d') . '" THEN 1 ELSE 0 END) as today_leads'),
+                    DB::raw('SUM(CASE WHEN leads.status = "New" THEN 1 ELSE 0 END) as new'),
+                    DB::raw('SUM(CASE WHEN leads.status = "Qualified" THEN 1 ELSE 0 END) as qualified'),
+                    DB::raw('SUM(CASE WHEN leads.status = "Follow Up" THEN 1 ELSE 0 END) as follow_up'),
+                    DB::raw('SUM(CASE WHEN leads.status = "appointments" THEN 1 ELSE 0 END) as appointments'),
+                    DB::raw('SUM(CASE WHEN leads.status = "quotation" THEN 1 ELSE 0 END) as quotation'),
+                    DB::raw('SUM(CASE WHEN leads.status = "Closed or Won" THEN 1 ELSE 0 END) as closed_or_won'),
+                    DB::raw('SUM(CASE WHEN leads.status = "Dropped or Cancel" THEN 1 ELSE 0 END) as dropped_or_cancel')
                 )
                 ->groupBy('users.id', 'users.name')
                 ->get();
+
+            $totals = [
+                'total_leads' => $userLeadsCount->sum('total_leads'),
+                'today_leads' => $userLeadsCount->sum('today_leads'),
+                'new' => $userLeadsCount->sum('new'),
+                'qualified' => $userLeadsCount->sum('qualified'),
+                'follow_up' => $userLeadsCount->sum('follow_up'),
+                'appointments' => $userLeadsCount->sum('appointments'),
+                'quotation' => $userLeadsCount->sum('quotation'),
+                'closed_or_won' => $userLeadsCount->sum('closed_or_won'),
+                'dropped_or_cancel' => $userLeadsCount->sum('dropped_or_cancel'),
+            ];
+        } else {
+            $totals = null;
+        }
+
+        // Date filter logic
+        $dateFilter = $request->input('date_filter');
+        $startDate = null;
+        $endDate = Carbon::now()->endOfDay();
+
+        switch ($dateFilter) {
+            case 'today':
+                $startDate = Carbon::today();
+                break;
+            case 'yesterday':
+                $startDate = Carbon::yesterday()->startOfDay();
+                $endDate = Carbon::yesterday()->endOfDay();
+                break;
+            case 'last_3_days':
+                $startDate = Carbon::now()->subDays(2)->startOfDay();
+                break;
+            case 'last_7_days':
+                $startDate = Carbon::now()->subDays(6)->startOfDay();
+                break;
+            case 'last_15_days':
+                $startDate = Carbon::now()->subDays(14)->startOfDay();
+                break;
+            case 'last_30_days':
+                $startDate = Carbon::now()->subDays(29)->startOfDay();
+                break;
+            case 'this_week':
+                $startDate = Carbon::now()->startOfWeek();
+                break;
+            case 'last_week':
+                $startDate = Carbon::now()->subWeek()->startOfWeek();
+                $endDate = Carbon::now()->subWeek()->endOfWeek();
+                break;
+            case 'this_month':
+                $startDate = Carbon::now()->startOfMonth();
+                break;
+            case 'last_month':
+                $startDate = Carbon::now()->subMonth()->startOfMonth();
+                $endDate = Carbon::now()->subMonth()->endOfMonth();
+                break;
+            case 'last_month_onwards':
+                $startDate = Carbon::now()->subMonth()->startOfMonth();
+                break;
+            default:
+                $startDate = Carbon::today();
+                break;
+        }
+
+        if ($request->filled('from_date') && $request->filled('to_date')) {
+            $startDate = Carbon::parse($request->from_date)->startOfDay();
+            $endDate = Carbon::parse($request->to_date)->endOfDay();
+        }
+
+        $leadsQuery = Leads::with('products', 'user')->whereBetween('created_at', [$startDate, $endDate]);
+        $leads = $leadsQuery->get();
+
+        $totalLeads = $leads->count();
+        $newLeads = $leads->where('status', 'New')->count();
+        $qualifiedLeads = $leads->where('status', 'Qualified')->count();
+        $flowupLeads = $leads->where('status', 'Follow Up')->count();
+        $demoLeads = $leads->whereIn('status', ['Online Demo', 'Offline Demo', 'Onsite Visit'])->count();
+        $quotationLeads = $leads->where('status', 'Quotation / Ready To Buy')->count();
+        $closedorwonLeads = $leads->where('status', 'Closed or Won')->count();
+        $cancelLeads = $leads->where('status', 'Dropped or Cancel')->count();
+
+        // Role based logic
+        if (auth()->id() == 1 || auth()->id() == 2) {
+            $leads = Leads::with('products', 'user')
+                ->whereDate('created_at', $today)
+                ->get();
+
+            $followupLeads = Leads::with('products', 'user')
+                ->whereRaw("TIMESTAMP(follow_date, follow_time) BETWEEN ? AND ?", [$today, $endOfDay])
+                ->get();
+
+            $openedLeadsNull = Leads::with('products', 'user')->whereNull('opened_at')->count();
+            $openedLeadsNotNull = Leads::with('products', 'user')->whereNotNull('opened_at')->count();
+
+            $todayLeads = Leads::whereDate('created_at', $today)->count();
+            $todayNewLeads = Leads::where('status', 'New')->whereDate('created_at', $today)->count();
+            $todayFlowupLeads = Leads::where('status', 'Follow Up')->whereDate('created_at', $today)->count();
+            $todayDemoLeads = Leads::whereIn('status', ['Online Demo', 'Offline Demo', 'Onsite Visit'])->whereDate('created_at', $today)->count();
+            $todayClosedorwonLeads = Leads::where('status', 'Closed or Won')->whereDate('created_at', $today)->count();
+        } else {
+            $followupLeads = Leads::with('products', 'user', 'assign')
+                ->whereRaw("TIMESTAMP(follow_date, follow_time) BETWEEN ? AND ?", [$today, $endOfDay])
+                ->where('user_id', $user->id)
+                ->get();
+
+            $totalLeads = Leads::where('user_id', $user->id)->count();
+            $todayLeads = Leads::where('user_id', $user->id)->where('assigned_name', $user->name)->whereDate('created_at', $today)->count();
+            $newLeads = Leads::where('user_id', $user->id)->where('status', 'New')->count();
+            $qualifiedLeads = Leads::where('user_id', $user->id)->where('status', 'Qualified')->count();
+            $flowupLeads = Leads::where('user_id', $user->id)->where('status', 'Follow Up')->count();
+            $demoLeads = Leads::where('user_id', $user->id)->whereIn('status', ['Online Demo', 'Offline Demo', 'Onsite Visit'])->count();
+            $quotationLeads = Leads::where('user_id', $user->id)->where('status', 'Quotation / Ready To Buy')->count();
+            $closedorwonLeads = Leads::where('user_id', $user->id)->where('status', 'Closed or Won')->count();
+            $cancelLeads = Leads::where('user_id', $user->id)->where('status', 'Dropped or Cancel')->count();
+
+            $openedLeadsNull = Leads::where('user_id', $user->id)->whereNull('opened_at')->count();
+            $openedLeadsNotNull = Leads::where('user_id', $user->id)->whereNotNull('opened_at')->count();
+
+            $todayFlowupLeads = Leads::where('user_id', $user->id)->where('status', 'Follow Up')->whereDate('created_at', $today)->count();
+            $todayNewLeads = Leads::where('user_id', $user->id)->where('status', 'New')->whereDate('created_at', $today)->count();
+            $todayDemoLeads = Leads::where('user_id', $user->id)->whereIn('status', ['Online Demo', 'Offline Demo', 'Onsite Visit'])->whereDate('created_at', $today)->count();
+            $todayClosedorwonLeads = Leads::where('user_id', $user->id)->where('status', 'Closed or Won')->whereDate('created_at', $today)->count();
+
+            $leads = Leads::where('user_id', $user->id)->whereDate('created_at', $today)->get();
+        }
+
+        $products = Products::all();
+        $role = $user->role ?? null;
+        $userLeads = $userLeadsCount;
+
+        return view('admin.home', compact(
+            'totalLeads', 'followupLeads', 'todayLeads', 'newLeads', 'qualifiedLeads',
+            'flowupLeads', 'demoLeads', 'quotationLeads', 'closedorwonLeads', 'cancelLeads',
+            'leads', 'products', 'assignedLeadsCount', 'userCount', 'userLeadsCount',
+            'todayFlowupLeads', 'todayDemoLeads', 'todayClosedorwonLeads',
+            'openedLeadsNull', 'openedLeadsNotNull', 'todayNewLeads',
+            'assignedName', 'role', 'today', 'userLeads', 'totals'
+        ));
+    }
+
+
+
+
+ public function filter(Request $request)
+    {
+
+        // dd($request->all());
+        try {
+            $filter = $request->input('filter', 'today');
+            $startDate = $request->input('start');
+            $endDate = $request->input('end');
+            $nameFilter = $request->input('name', 'all');
+
+            $query = Leads::query()->with('user');
+
+            // Apply name filter if not 'all'
+            if ($nameFilter !== 'all') {
+                $query->whereHas('user', function($q) use ($nameFilter) {
+                    $q->where('name', $nameFilter);
+                });
             }
 
-        if (auth()->id() == 1) {
-            // $leads = Leads::with('products', 'user')->latest()->take(7)->get();
-            $leads = Leads::with('products', 'user')
-            ->whereDate('created_at', Carbon::today())
-            ->get();
-
-            // followup
-            $followupLeads = Leads::with('products', 'user')
-            ->whereRaw("TIMESTAMP(follow_date, follow_time) BETWEEN ? AND ?", [$today, $endOfDay])
-            ->get();
-            // dd($followupLeads);
-            $totalLeads = Leads::with('products', 'user')->count();
-            $newLeads = Leads::with('products', 'user')->where('status', 'New')->count();
-            $qualifiedLeads = Leads::with('products', 'user')->where('status', 'Qualified')->count();
-            $flowupLeads = Leads::with('products', 'user')->where('status', 'Follow Up')->count();
-            $demoLeads = Leads::with('products', 'user')->whereIn('status', ['Online Demo', 'Offline Demo', 'Onsite Visit'])->count();
-            $quotationLeads = Leads::with('products', 'user')->where('status', 'Quotation / Ready To Buy')->count();
-            $closedorwonLeads = Leads::with('products', 'user')->where('status', 'Closed or Won')->count();
-            $cancelLeads = Leads::with('products', 'user')->where('status', 'Dropped or Cancel')->count(); // Fixed Typo
-            // $openedLeads = Leads::whereNotNull('opened_at')->count();
-            // $openedLeads = Leads::whereDate('opened_at')->count();
-            // dd('ijnn');
-            // $openedLeads = Leads::whereDate('opened_at', Carbon::today())->count();
-            // today
-            // $openedLeads = Leads::with('products', 'user')->whereNull('opened_at')->count();
-
-            $openedLeadsNull = Leads::with('products', 'user')->whereNull('opened_at')->count();
-            // dd($openedLeadsNull);
-            $openedLeadsNotNull = Leads::with('products', 'user')->whereNotNull('opened_at')->count();
 
 
-            $todayLeads = Leads::whereDate('created_at', $today)->count();
-            $todayNewLeads = Leads::with('products', 'user')->where('status', 'New')->whereDate('created_at', $today)->count();
-            $todayFlowupLeads = Leads::with('products', 'user')->where('status', 'Follow Up')->whereDate('created_at', $today)->count();
-            $todayDemoLeads = Leads::with('products', 'user')->whereIn('status', ['Online Demo', 'Offline Demo', 'Onsite Visit'])->whereDate('created_at', $today)->count();
-            $todayClosedorwonLeads = Leads::with('products', 'user')->where('status', 'Closed or Won')->whereDate('created_at', $today)->count();
+            // Apply date filters
+            if ($filter !== 'total') {
+                if ($filter === 'custom') {
+                    if (!$startDate || !$endDate) {
+                        return response()->json([
+                            'error' => 'Both start and end dates are required for custom range'
+                        ], 400);
+                    }
 
+                    $start = Carbon::parse($startDate)->startOfDay();
+                    $end = Carbon::parse($endDate)->endOfDay();
+                    $query->whereBetween('created_at', [$start, $end]);
+                } else {
+                    switch ($filter) {
+                        case 'today':
+                            $query->whereDate('created_at', Carbon::today());
+                            break;
+                        case 'yesterday':
+                            $query->whereDate('created_at', Carbon::yesterday());
+                            break;
+                        case 'last_3_days':
+                            $query->whereBetween('created_at', [
+                                Carbon::now()->subDays(2)->startOfDay(),
+                                Carbon::now()->endOfDay()
+                            ]);
+                            break;
+                        case 'last_7_days':
+                            $query->whereBetween('created_at', [
+                                Carbon::now()->subDays(6)->startOfDay(),
+                                Carbon::now()->endOfDay()
+                            ]);
+                            break;
+                        case 'last_15_days':
+                            $query->whereBetween('created_at', [
+                                Carbon::now()->subDays(14)->startOfDay(),
+                                Carbon::now()->endOfDay()
+                            ]);
+                            break;
+                        case 'last_30_days':
+                            $query->whereBetween('created_at', [
+                                Carbon::now()->subDays(29)->startOfDay(),
+                                Carbon::now()->endOfDay()
+                            ]);
+                            break;
+                        case 'this_week':
+                            $query->whereBetween('created_at', [
+                                Carbon::now()->startOfWeek(),
+                                Carbon::now()->endOfWeek()
+                            ]);
+                            break;
+                        case 'last_week':
+                            $query->whereBetween('created_at', [
+                                Carbon::now()->subWeek()->startOfWeek(),
+                                Carbon::now()->subWeek()->endOfWeek()
+                            ]);
+                            break;
+                        case 'this_month':
+                            $query->whereBetween('created_at', [
+                                Carbon::now()->startOfMonth(),
+                                Carbon::now()->endOfMonth()
+                            ]);
+                            break;
+                        case 'last_month':
+                            $query->whereBetween('created_at', [
+                                Carbon::now()->subMonth()->startOfMonth(),
+                                Carbon::now()->subMonth()->endOfMonth()
+                            ]);
+                            break;
+                        case 'from_last_month':
+                            $query->where('created_at', '>=', Carbon::now()->subMonth()->startOfMonth());
+                            break;
+                        default:
+                            $query->whereDate('created_at', Carbon::today());
+                    }
+                }
+            }
 
-        } elseif (auth()->id() == 2) {
+            // Get lead statistics grouped by user
+            $userLeads = $query
+                ->select([
+                    'assigned_by_id',
+                    DB::raw('COUNT(*) as total'),
+                    DB::raw('SUM(CASE WHEN status = "New" THEN 1 ELSE 0 END) as new'),
+                    DB::raw('SUM(CASE WHEN status = "Qualified" THEN 1 ELSE 0 END) as qualified'),
+                    DB::raw('SUM(CASE WHEN status = "Follow Up" THEN 1 ELSE 0 END) as follow_up'),
+                    DB::raw('SUM(CASE WHEN status IN ("Online Demo", "Offline Demo", "Onsite Visit") THEN 1 ELSE 0 END) as appointments'),
+                    DB::raw('SUM(CASE WHEN status = "Quotation / Ready To Buy" THEN 1 ELSE 0 END) as quotation'),
+                    DB::raw('SUM(CASE WHEN status = "Closed or Won" THEN 1 ELSE 0 END) as won'),
+                    DB::raw('SUM(CASE WHEN status = "Dropped or Cancel" THEN 1 ELSE 0 END) as cancel')
+                ])
+                ->groupBy('assigned_by_id')
+                ->get();
 
-            // followup
-            // $followupLeads = Leads::with('products', 'user')
-            // ->whereRaw("TIMESTAMP(follow_date, follow_time) BETWEEN ? AND ?", [$today, $endOfDay])
-            // ->get();
-            // // dd($followupLeads);
-            // // Admin: Get only leads assigned to them
-            // $leads = Leads::with('products', 'user')
-            // ->where('assigned_name', $user->id)
-            // ->whereDate('created_at', Carbon::today())
-            // ->get();
-            // $totalLeads = Leads::with('products', 'user')->where('user_id', $user->id)->count();
-            // $todayLeads = Leads::where('user_id', $user->id)->whereDate('created_at', $today)->count();
-            // $newLeads = Leads::with('products', 'user')->where('user_id', $user->id)->where('status', 'New')->count();
-            // $demoLeads = Leads::with('products', 'user')->where('user_id', $user->id)->whereIn('status', ['Online Demo', 'Offline Demo', 'Onsite Visit'])->count();
-            // $quotationLeads = Leads::with('products', 'user')->where('user_id', $user->id)->where('status', 'Quotation / Ready To Buy')->count();
+            // Get user names for the leads
+            $userIds = $userLeads->pluck('assigned_by_id')->unique();
+            $users = User::whereIn('id', $userIds)->pluck('name', 'id');
 
-            // $qualifiedLeads = Leads::with('products', 'user')->where('user_id', $user->id)->where('status', 'Qualified')->count();
-            // $flowupLeads = Leads::with('products', 'user')->where('user_id', $user->id)->where('status', 'Follow Up')->count();
-            // $closedorwonLeads = Leads::with('products', 'user')->where('user_id', $user->id)->where('status', 'Closed or Won')->count();
-            // $cancelLeads = Leads::with('products', 'user')->where('user_id', $user->id)->where('status', 'Dropped or Cancel')->count(); // Fixed Typo
-            // // $openedLeads = Leads::whereDate('opened_at', Carbon::today())->count();
-            // // $openedLeads = Leads::with('products', 'user')->where('user_id', $user->id)->whereNull('opened_at')->count();
+// dd($userLeads);
+            // dd($userLeads);
 
-            // $openedLeadsNull = Leads::with('products', 'user')->where('user_id', $user->id)->whereNull('opened_at')->count();
-            // // dd($openedLeadsNull);
-            // $openedLeadsNotNull = Leads::with('products', 'user')->where('user_id', $user->id)->whereNotNull('opened_at')->count();
-            // $todayNewLeads =  Leads::with('products', 'user')->where('user_id', $user->id)->where('status', 'New')->whereDate('created_at', $today)->count();
+            // Format the data with user names
+            $formattedLeads = $userLeads->map(function($item) use ($users) {
+                return [
+                    'name' => $users[$item->assigned_by_id] ?? 'Unknown',
+                    'new' => $item->new,
+                    'qualified' => $item->qualified,
+                    'follow_up' => $item->follow_up,
+                    'appointments' => $item->appointments,
+                    'quotation' => $item->quotation,
+                    'won' => $item->won,
+                    'cancel' => $item->cancel,
+                    'total' => $item->total
+                ];
+            });
 
-
-            // $todayFlowupLeads = Leads::with('products', 'user')->where('user_id', $user->id)->where('status', 'Follow Up')->whereDate('created_at', $today)->count();
-            // $todayDemoLeads = Leads::with('products', 'user')->where('user_id', $user->id)->whereIn('status', ['Online Demo', 'Offline Demo', 'Onsite Visit'])->whereDate('created_at', $today)->count();
-            // $todayClosedorwonLeads = Leads::with('products', 'user')->where('user_id', $user->id)->where('status', 'Closed or Won')->whereDate('created_at', $today)->count();
-
-             $leads = Leads::with('products', 'user')
-            ->whereDate('created_at', Carbon::today())
-            ->get();
-
-            // followup
-            $followupLeads = Leads::with('products', 'user')
-            ->whereRaw("TIMESTAMP(follow_date, follow_time) BETWEEN ? AND ?", [$today, $endOfDay])
-            ->get();
-            // dd($followupLeads);
-            $totalLeads = Leads::with('products', 'user')->count();
-            $newLeads = Leads::with('products', 'user')->where('status', 'New')->count();
-            $qualifiedLeads = Leads::with('products', 'user')->where('status', 'Qualified')->count();
-            $flowupLeads = Leads::with('products', 'user')->where('status', 'Follow Up')->count();
-            $demoLeads = Leads::with('products', 'user')->whereIn('status', ['Online Demo', 'Offline Demo', 'Onsite Visit'])->count();
-            $quotationLeads = Leads::with('products', 'user')->where('status', 'Quotation / Ready To Buy')->count();
-            $closedorwonLeads = Leads::with('products', 'user')->where('status', 'Closed or Won')->count();
-            $cancelLeads = Leads::with('products', 'user')->where('status', 'Dropped or Cancel')->count(); // Fixed Typo
-            // $openedLeads = Leads::whereNotNull('opened_at')->count();
-            // $openedLeads = Leads::whereDate('opened_at')->count();
-            // dd('ijnn');
-            // $openedLeads = Leads::whereDate('opened_at', Carbon::today())->count();
-            // today
-            // $openedLeads = Leads::with('products', 'user')->whereNull('opened_at')->count();
-
-            $openedLeadsNull = Leads::with('products', 'user')->whereNull('opened_at')->count();
-            // dd($openedLeadsNull);
-            $openedLeadsNotNull = Leads::with('products', 'user')->whereNotNull('opened_at')->count();
-
-
-            $todayLeads = Leads::whereDate('created_at', $today)->count();
-            $todayNewLeads = Leads::with('products', 'user')->where('status', 'New')->whereDate('created_at', $today)->count();
-            $todayFlowupLeads = Leads::with('products', 'user')->where('status', 'Follow Up')->whereDate('created_at', $today)->count();
-            $todayDemoLeads = Leads::with('products', 'user')->whereIn('status', ['Online Demo', 'Offline Demo', 'Onsite Visit'])->whereDate('created_at', $today)->count();
-            $todayClosedorwonLeads = Leads::with('products', 'user')->where('status', 'Closed or Won')->whereDate('created_at', $today)->count();
-
-        } else {
-            // followup
-            $followupLeads = Leads::with('products', 'user','assign')
-            ->whereRaw("TIMESTAMP(follow_date, follow_time) BETWEEN ? AND ?", [$today, $endOfDay])
-            ->where('user_id', $user->id)
-            ->get();
-            // dd($followupLeads);
-
-            $totalLeads = Leads::with('products', 'user')->where('user_id', $user->id)->count();
-            // $todayLeads = Leads::where('user_id', $user->id)->whereDate('created_at', $today)->count();
-            $todayLeads = Leads::where('user_id', $user->id)
-            ->where('assigned_name', $user->name)
-            ->whereDate('created_at', $today)
-            ->count();
-            // dd($todayLeads);
-            $newLeads = Leads::with('products', 'user')->where('user_id', $user->id)->where('status', 'New')->count();
-            $demoLeads = Leads::with('products', 'user')->where('user_id', $user->id)->whereIn('status', ['Online Demo', 'Offline Demo', 'Onsite Visit'])->count();
-            $quotationLeads = Leads::with('products', 'user')->where('user_id', $user->id)->where('status', 'Quotation / Ready To Buy')->count();
-
-            $qualifiedLeads = Leads::with('products', 'user')->where('user_id', $user->id)->where('status', 'Qualified')->count();
-            $flowupLeads = Leads::with('products', 'user')->where('user_id', $user->id)->where('status', 'Follow Up')->count();
-            $closedorwonLeads = Leads::with('products', 'user')->where('user_id', $user->id)->where('status', 'Closed or Won')->count();
-            $cancelLeads = Leads::with('products', 'user')->where('user_id', $user->id)->where('status', 'Dropped or Cancel')->count(); // Fixed TypoFixed Typo
-            // $openedLeads = Leads::whereDate('opened_at', Carbon::today())->count();
-            // $openedLeads = Leads::with('products', 'user')->where('user_id', $user->id)->whereNull('opened_at')->count();
-
-            $openedLeadsNull = Leads::with('products', 'user')->where('user_id', $user->id)->whereNull('opened_at')->count();
-            // dd($openedLeadsNull);
-            $openedLeadsNotNull = Leads::with('products', 'user')->where('user_id', $user->id)->whereNotNull('opened_at')->count();
-
-
-            $todayFlowupLeads = Leads::with('products', 'user')->where('user_id', $user->id)->where('status', 'Follow Up')->whereDate('created_at', $today)->count();
-            $todayNewLeads =  Leads::with('products', 'user')->where('user_id', $user->id)->where('status', 'New')->whereDate('created_at', $today)->count();
-            $todayDemoLeads = Leads::with('products', 'user')->where('user_id', $user->id)->whereIn('status', ['Online Demo', 'Offline Demo', 'Onsite Visit'])->whereDate('created_at', $today)->count();
-            $todayClosedorwonLeads = Leads::with('products', 'user')->where('user_id', $user->id)->where('status', 'Closed or Won')->whereDate('created_at', $today)->count();
+            // Calculate totals
+            $totals = [
+                'total' => $formattedLeads->sum('total'),
+                'new' => $formattedLeads->sum('new'),
+                'qualified' => $formattedLeads->sum('qualified'),
+                'follow_up' => $formattedLeads->sum('follow_up'),
+                'appointments' => $formattedLeads->sum('appointments'),
+                'quotation' => $formattedLeads->sum('quotation'),
+                'won' => $formattedLeads->sum('won'),
+                'cancel' => $formattedLeads->sum('cancel'),
+            ];
 
 
 
-            // Regular users: Get only leads they created
-            $leads = Leads::with('products', 'user')
-            ->where('user_id', $user->id)
-            ->whereDate('created_at', Carbon::today())
-            ->get();
+            return response()->json([
+                'html' => view('admin.partials.lead_stats_table', [
+                    'userLeads' => $formattedLeads,
+                    'totals' => $totals
+                ])->render()
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Filter error: ' . $e->getMessage());
+            return response()->json([
+                'error' => 'Server error: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+public function filterLeadsDetails(Request $request)
+{
+    try {
+        $status = $request->input('status', 'all');
+        $userName = $request->input('user', 'all');
+        $filter = $request->input('filter', 'today');
+        $startDate = $request->input('start');
+        $endDate = $request->input('end');
+        $nameFilter = $request->input('name', 'all');
+
+        $query = Leads::with(['products', 'assignedBy', 'assign', 'lastUpdateBy']);
+
+        // Apply status filter
+        if ($status !== 'all') {
+            if ($status === 'appointments') {
+                $query->whereIn('status', ['Online Demo', 'Offline Demo', 'Onsite Visit']);
+            } elseif ($status === 'quotation') {
+                $query->where('status', 'Quotation / Ready To Buy');
+            } else {
+                $query->where('status', $status);
+            }
+        }
+
+        // Apply user filter
+        if ($userName !== 'all') {
+            $query->whereHas('assignedBy', function($q) use ($userName) {
+                $q->where('name', $userName);
+            });
+        }
+
+        if ($nameFilter !== 'all') {
+            $query->whereHas('assignedBy', function($q) use ($nameFilter) {
+                $q->where('name', $nameFilter);
+            });
+        }
+
+        // Apply date filters
+        if ($filter !== 'total') {
+            if ($filter === 'custom') {
+                if (!$startDate || !$endDate) {
+                    return response()->json([
+                        'error' => 'Both start and end dates are required for custom range'
+                    ], 400);
+                }
+
+                $start = Carbon::parse($startDate)->startOfDay();
+                $end = Carbon::parse($endDate)->endOfDay();
+                $query->whereBetween('created_at', [$start, $end]);
+            } else {
+                switch ($filter) {
+                    case 'today':
+                        $query->whereDate('created_at', Carbon::today());
+                        break;
+                    case 'yesterday':
+                        $query->whereDate('created_at', Carbon::yesterday());
+                        break;
+                    case 'last_3_days':
+                        $query->whereBetween('created_at', [
+                            Carbon::now()->subDays(2)->startOfDay(),
+                            Carbon::now()->endOfDay()
+                        ]);
+                        break;
+                    case 'last_7_days':
+                        $query->whereBetween('created_at', [
+                            Carbon::now()->subDays(6)->startOfDay(),
+                            Carbon::now()->endOfDay()
+                        ]);
+                        break;
+                    case 'last_15_days':
+                        $query->whereBetween('created_at', [
+                            Carbon::now()->subDays(14)->startOfDay(),
+                            Carbon::now()->endOfDay()
+                        ]);
+                        break;
+                    case 'last_30_days':
+                        $query->whereBetween('created_at', [
+                            Carbon::now()->subDays(29)->startOfDay(),
+                            Carbon::now()->endOfDay()
+                        ]);
+                        break;
+                    case 'this_week':
+                        $query->whereBetween('created_at', [
+                            Carbon::now()->startOfWeek(),
+                            Carbon::now()->endOfWeek()
+                        ]);
+                        break;
+                    case 'last_week':
+                        $query->whereBetween('created_at', [
+                            Carbon::now()->subWeek()->startOfWeek(),
+                            Carbon::now()->subWeek()->endOfWeek()
+                        ]);
+                        break;
+                    case 'this_month':
+                        $query->whereBetween('created_at', [
+                            Carbon::now()->startOfMonth(),
+                            Carbon::now()->endOfMonth()
+                        ]);
+                        break;
+                    case 'last_month':
+                        $query->whereBetween('created_at', [
+                            Carbon::now()->subMonth()->startOfMonth(),
+                            Carbon::now()->subMonth()->endOfMonth()
+                        ]);
+                        break;
+                    case 'from_last_month':
+                        $query->where('created_at', '>=', Carbon::now()->subMonth()->startOfMonth());
+                        break;
+                    default:
+                        $query->whereDate('created_at', Carbon::today());
+
+            }
+        }
 
         }
 
+        $leads = $query->latest()->get();
 
+     $products = Products::all();
+    $selectedProducts = [];
+    $assignedName = User::select('id', 'name')->distinct()->get();
 
-         // Count leads based on status
-            // Fetch all products
-            $products = Products::all();
-
-            // Get authenticated user and their role
-            $user = auth()->user();
-            $role = $user->role; // Assuming the role is stored in the users table
-
-    return view('admin.home', compact(
-        'totalLeads','followupLeads','todayLeads', 'newLeads','qualifiedLeads','flowupLeads', 'demoLeads', 'quotationLeads','closedorwonLeads', 'cancelLeads', 'leads', 'products','assignedLeadsCount','userCount','userLeadsCount','todayFlowupLeads','todayDemoLeads','todayClosedorwonLeads','openedLeadsNull','openedLeadsNotNull','todayNewLeads'));
-
+        return view('admin.partials.leads_details_table', ['leads' => $leads,
+            'products' => $products]);
+    } catch (\Exception $e) {
+        \Log::error('Filter leads details error: ' . $e->getMessage());
+        return response()->json([
+            'error' => 'Server error: ' . $e->getMessage()
+        ], 500);
     }
+}
+
 }

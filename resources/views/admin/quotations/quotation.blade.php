@@ -1,10 +1,11 @@
+{{--
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Proposal for Tally Prime</title>
+    <title>Proposal for {{ implode(', ', $products->pluck('name')->toArray()) }}</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -59,16 +60,14 @@
 </head>
 
 <body>
-    <center><div class="logo">
-        <img src="{{ public_path('backend/images/logo/logo.png') }}" alt="iSaral Business Solutions">
-    </div></center>
+    <center>
+        <div class="logo">
+            <img src="{{ public_path('backend/images/logo/logo.png') }}" alt="iSaral Business Solutions">
+        </div>
+    </center>
 
     <center>
-        <h3>Proposal for
-            @foreach ($products as $product)
-                {{ $product->name }}@if (!$loop->last), @endif
-            @endforeach
-        </h3>
+        <h3>Proposal for {{ implode(', ', $products->pluck('name')->toArray()) }}</h3>
     </center>
 
     <p><strong>To,</strong><br>
@@ -81,38 +80,25 @@
         <h3>About iSaral Business Solutions Pvt Ltd</h3>
     </center>
 
-    <p>We are a premier Enterprise solutions company addressing requirements of customers worldwide, helping
-        businesses improve processes by taking advantage of web-based technologies. At iSaral Business Solutions, we
-        create Enterprise solutions; a seamless means of changing the way companies do business, by speeding up
-        communication and information flow, enhancing productivity, extending their enterprise to their clients, and
-        building global brands.</p>
-
-    <p>iSaral Business Solutions is the Certified Partner for Tally Solutions Pvt Ltd, Sag infotech Pvt Ltd, and
-        Distributor for Sify Technologies Ltd, eMudhra Ltd, Capricorn & Pantasign (Digital Signature).</p>
-
-    <p>iSaral has a commitment to performance, excellence, and client satisfaction, after-sale support, and software
-        development services.</p>
-
-    <p>We provide software that streamlines your business process with exclusive features that increase efficiency,
-        improve communications, and enhance performance, allowing you to be more productive, better equipped, and at
-        a lower cost.</p>
-
-    <p>We value your attention to the services provided by iSaral. As per our discussion, please find enclosed the
-        detailed features and costing for "Tally Prime".</p>
+    <p>{{ $lead->about_us }}</p>
 
     <hr>
 
     <h2>Kind Attn: {{ $lead->name }}</h2>
 
-    <p><strong>Ref:</strong> iSaral/2021-22/379 &nbsp;&nbsp;<strong>Date:</strong>
-        {{ now()->format('d-m-Y') }}</p>
+    <p><strong>Ref:</strong> {{ $lead->quotation_reference }} &nbsp;&nbsp;<strong>Date:</strong> {{
+        now()->format('d-m-Y') }}</p>
 
     <p><em>Dear Sir/Madam,</em></p>
-
     <p><em>We thank you for the keen interest your organization has shown in our products.</em></p>
-    <p><em>As per our discussion and requirement of wall coverings, please find below quotation as requested.</em>
-    </p>
+    <p><em>As per our discussion and requirement, please find below quotation as requested.</em></p>
 
+    <p><strong>Quotation Reference:</strong> {{ $lead->quotation_reference }}</p>
+    <p><strong>Quotation Amount:</strong> ₹{{ number_format($lead->quotation_amount, 2) }}</p>
+    <p><strong>Tax:</strong> {{ $lead->quotation_tax }}%</p>
+    <p><strong>Total Amount:</strong> ₹{{ number_format($lead->quotation_amount * (1 + $lead->quotation_tax/100), 2) }}
+    </p>
+    <p><strong>Valid Until:</strong> {{ \Carbon\Carbon::parse($lead->quotation_expiry_date)->format('d M, Y') }}</p>
 
     <table>
         <thead>
@@ -120,35 +106,204 @@
                 <th>Product</th>
                 <th>Description</th>
                 <th>Price</th>
+                <th>Tax Rate</th>
+                <th>Total</th>
             </tr>
         </thead>
         <tbody>
-            @foreach ($products as $product)
-                <tr>
-                    <td>{{ $product->name }}</td>
-                    <td>{{ $product->description }}</td>
-                    <td>{{ config('settings.currency_symbol') }}{{ $product->price }}</td>
-                </tr>
+            @foreach($products as $product)
+            <tr>
+                <td>{{ $product->name }}</td>
+                <td>{{ $product->description }}</td>
+                <td>₹{{ number_format($product->pivot->price, 2) }}</td>
+                <td>{{ $product->pivot->tax }}%</td>
+                <td>₹{{ number_format($product->pivot->price * (1 + $product->pivot->tax/100), 2) }}</td>
+            </tr>
             @endforeach
         </tbody>
         <tfoot>
             <tr>
-                <td colspan="2"><strong>Total</strong></td>
-                <td>
-                    <strong>
-                        {{ config('settings.currency_symbol') }}
-                        {{ $products->sum('price') }}
-                    </strong>
+                <td colspan="4"><strong>Subtotal</strong></td>
+                <td><strong>₹{{ number_format($lead->quotation_amount, 2) }}</strong></td>
+            </tr>
+            <tr>
+                <td colspan="4"><strong>Tax ({{ $lead->quotation_tax }}%)</strong></td>
+                <td><strong>₹{{ number_format($lead->quotation_amount * $lead->quotation_tax/100, 2) }}</strong></td>
+            </tr>
+            <tr>
+                <td colspan="4"><strong>Total Amount</strong></td>
+                <td><strong>₹{{ number_format($lead->quotation_amount * (1 + $lead->quotation_tax/100), 2) }}</strong>
                 </td>
             </tr>
         </tfoot>
-
     </table>
 
-    <p class="note"><strong>Note:</strong> 18% GST Extra</p>
+    <h3>Terms & Conditions</h3>
+    <ol>
+        @foreach($terms as $term)
+        <li>{{ $term }}</li>
+        @endforeach
+    </ol>
 
-    <p><em>Hope that the above is in perfect line with your requirements in anticipation of your early order and
-            assuring you of our best services at all times.</em></p>
+    <h3>Notes</h3>
+    <p>{{ $lead->quotation_notes }}</p>
+
+    <div class="footer">
+        <p>Yours truly,</p>
+        <p><strong>iSaral Business Solutions Pvt Ltd</strong><br>
+            Web - <a href="http://www.isaral.in">www.isaral.in</a></p>
+    </div>
+</body>
+
+</html> --}}
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Quotation #{{ $lead->id }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .company-info {
+            float: right;
+            text-align: right;
+        }
+
+        .customer-info {
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .terms {
+            margin-top: 30px;
+        }
+
+        .signature {
+            margin-top: 50px;
+        }
+
+        .page-break {
+            page-break-after: always;
+        }
+    </style>
+</head>
+
+<body>
+
+    <center>
+        <div class="logo">
+            <img src="http://127.0.0.1:8000/backend/images/logo/logo.png" alt="iSaral Business Solutions">
+        </div>
+    </center>
+
+    <div class="header">
+        <h1>QUOTATION</h1>
+        <p>Date: {{ $date }} | Valid Until: {{ $expiry_date }} | Ref: {{ $lead->quotation_reference }}</p>
+    </div>
+
+
+
+    <div class="customer-info">
+        <h3>To:</h3>
+        <p><strong>{{ $lead->name }}</strong></p>
+        <p>{{ $lead->address }}</p>
+        <p>Phone: {{ $lead->mobile }}</p>
+        <p>Email: {{ $lead->email }}</p>
+    </div>
+
+
+    <hr>
+
+    <center>
+        <h3>About iSaral Business Solutions Pvt Ltd</h3>
+    </center>
+
+    <p>{{ $lead->about_us }}</p>
+
+    <hr>
+
+    <h2>Kind Attn: {{ $lead->name }}</h2>
+
+    <p><strong>Ref:</strong> {{ $lead->quotation_reference }} &nbsp;&nbsp;<strong>Date:</strong> {{
+        now()->format('d-m-Y') }}</p>
+
+    <p><em>Dear Sir/Madam,</em></p>
+    <p><em>We thank you for the keen interest your organization has shown in our products.</em></p>
+    <p><em>As per our discussion and requirement, please find below quotation as requested.</em></p>
+
+    <p><strong>Quotation Reference:</strong> {{ $lead->quotation_reference }}</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Price</th>
+                <th>Discount</th>
+                <th>Tax</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($products as $product)
+            <tr>
+                <td>{{ $product->name }}</td>
+                <td class="text-right">Rs.{{ number_format($product->pivot->price, 2) }}</td>
+                <td class="text-right">Rs.{{ number_format($product->pivot->discount, 2) }}</td>
+                <td class="text-right">Rs.{{ number_format($product->pivot->tax_amount, 2) }}</td>
+                <td class="text-right">Rs.{{ number_format($product->pivot->total_amount, 2) }}</td>
+            </tr>
+            @endforeach
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="4" class="text-right"><strong>Subtotal:</strong></td>
+                <td class="text-right">Rs.{{ number_format($lead->quotation_amount, 2) }}</td>
+            </tr>
+            <tr>
+                <td colspan="4" class="text-right"><strong>Total Discount:</strong></td>
+                <td class="text-right">Rs.{{ number_format($lead->quotation_discount, 2) }}</td>
+            </tr>
+            <tr>
+                <td colspan="4" class="text-right"><strong>Total Tax:</strong></td>
+                <td class="text-right">Rs.{{ number_format($lead->quotation_tax, 2) }}</td>
+            </tr>
+            <tr>
+                <td colspan="4" class="text-right"><strong>Grand Total:</strong></td>
+                <td class="text-right">Rs.{{ number_format($lead->quotation_total, 2) }}</td>
+            </tr>
+        </tfoot>
+    </table>
 
     <h3>Payment Conditions:</h3>
     <table>
@@ -178,41 +333,22 @@
         </tr>
     </table>
 
-    <h3>Tally Software Installation</h3>
-    <ol>
-        <li>Installation by online / Offline, depending on client requirement. Visiting Client Place only @ Bangalore,
-            Rest of Bangalore only online.</li>
-        <li>Add-on will be provided @ Free of cost (According to the Plan).</li>
-        <li>Existing Customized Tools will be given @ 50% Discount.</li>
-        <li>Any other customizations will be charged extra based on your requirements.</li>
-        <li>No back-end data entry support.</li>
-    </ol>
 
-    <h3>Support Process:</h3>
-    <p><em>The help desk will be available on working days from 10 AM to 7 PM.</em></p>
-    <ol>
-        <li>Application Support.</li>
-        <li>Telephonic and remote support has always been the very strong point of iSaral, so continuing our
-            tradition, we provide support.</li>
-        <li>Support @ Client End (if needed), in case of Onsite Solution. - charged separately depending on time,
-            location & requirements.</li>
-    </ol>
-
-    <h3>Pre-Requisites</h3>
-    <ol>
-        <li>Tally Prime Supports only Windows 64 Bit OS.</li>
-        <li>Internet connectivity for installation and support.</li>
-    </ol>
-
-    <p><em>For any clarification feel free to contact us.</em></p>
+    <div class="terms">
+        <h3>Terms & Conditions:</h3>
+        <ul>
+            @foreach($terms as $term)
+            <li>{{ $term }}</li>
+            @endforeach
+        </ul>
+        @if($lead->quotation_notes)
+        <p><strong>Notes:</strong> {{ $lead->quotation_notes }}</p>
+        @endif
+    </div>
 
     <div class="footer">
         <p>Yours truly,</p>
-        <p><strong>Rajesh H B</strong><br>
-            M: +91 9108024198<br>
-            E: rajesh@isaral.in</p>
         <p><strong>iSaral Business Solutions Pvt Ltd</strong><br>
-            #16, GF, 4th Main Road, Dwarakanagar, Nagarabhawi, Bangalore - 560072<br>
             Web - <a href="http://www.isaral.in">www.isaral.in</a></p>
     </div>
 </body>

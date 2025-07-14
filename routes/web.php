@@ -30,7 +30,6 @@ Route::get('/home', function () {
 
         return redirect()->route('admin.home')->with('status', session('status'));
     }
-
     return redirect()->route('admin.home');
 });
 
@@ -102,7 +101,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth']], 
         Route::post('quotations/{lead}/toggle-pin', [QuotationController::class, 'togglePin'])->name('quotations.toggle-pin');
 
         Route::get('/quotations', [QuotationController::class, 'index'])->name('quotations.index');
-        Route::post('/send-quotation/{id}', [QuotationController::class, 'sendQuotationEmail'])->name('send.quotation');
+        // Route::post('/send-quotation/{id}', [QuotationController::class, 'sendQuotationEmail'])->name('send.quotation');
 
 
         Route::post('/send-demo/{leadId}', [ApponitmentsController::class, 'sendDemoEmail'])->name('send.demo');
@@ -138,6 +137,21 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth']], 
         Route::post('qualified/{lead}/toggle-pin', [QualifiedController::class, 'togglePin'])->name('qualified.toggle-pin');
 
 
+
+    Route::put('quotations/update-quotation/{id}', [QuotationController::class, 'updateQuotation'])
+    ->name('quotations.update-quotation');
+
+    Route::get('quotations/preview-pdf/{id}', [QuotationController::class, 'previewPdf'])
+        ->name('quotations.preview-pdf');
+
+    Route::post('quotations/send-quotation-email/{id}', [QuotationController::class, 'sendQuotationEmail'])->name('quotations.send.email');
+
+    Route::post('quotations/generate-pdf/{leadId}', [QuotationController::class, 'generatePDF']);
+
+
+
+
+
         Route::get('admin/leads/{lead}/products', [LeadsController::class, 'getProducts'])->name('leads.products');
 //
         Route::get('/leads/get-assigned-name', [LeadsController::class, 'getAssignedName'])
@@ -149,6 +163,19 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth']], 
         // excel
         // Route::post('/products/import', [ProductsController::class, 'importExcel'])->name('products.import');
 
+// homepage filter
+       Route::get('/filter-leads', [HomeController::class, 'filter'])->name('filter.leads');
+       Route::get('/filter/leads/details', [HomeController::class, 'filterLeadsDetails'])->name('filter.leads.details');
+
+
+        Route::get('leads/{lead}/quotation', [QuotationController::class, 'editQuotation'])->name('quotations.edit');
+        // Route::put('leads/{lead}/quotation', [QuotationController::class, 'updateQuotation'])->name('quotations.update');
+        Route::get('leads/{lead}/quotation/preview', [QuotationController::class, 'previewQuotation'])->name('quotations.preview');
+        Route::get('leads/{lead}/quotation/send', [QuotationController::class, 'sendQuotation'])->name('quotations.send');
+
+
+
+
 
 
 });
@@ -159,4 +186,17 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth']], 
     Route::post('password', [ChangePasswordController::class, 'update'])->name('password.update');
     Route::post('profile', [ChangePasswordController::class, 'updateProfile'])->name('password.updateProfile');
     Route::post('profile/destroy', [ChangePasswordController::class, 'destroy'])->name('password.destroyProfile');
+});
+
+
+Route::get('/test-email', function() {
+    try {
+        Mail::raw('This is a test email', function($message) {
+            $message->to('your@testemail.com')
+                    ->subject('Test Email');
+        });
+        return "Test email sent successfully!";
+    } catch (\Exception $e) {
+        return "Error sending test email: " . $e->getMessage();
+    }
 });

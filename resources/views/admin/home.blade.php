@@ -1,413 +1,494 @@
 @extends('layouts.admin')
 @section('title', __('cruds.userDashboard.title'))
 @section('content')
-    <div class="midde_cont">
-        <div class="container-fluid">
-            <div class="row column_title">
-                <div class="col-md-12">
-                    <div class="page_title">
-                        <h2>Dashboard</h2>
+<div class="midde_cont">
+    <div class="container-fluid">
+        <div class="row column_title">
+            <div class="col-md-12">
+                <div class="page_title">
+                    <h2>{{ trans('cruds.userDashboard.title') }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="row column1">
+
+            @if (!in_array(auth()->id(), [1, 2]))
+            <div class="col-md-6 col-lg-3">
+                <div class="full counter_section margin_bottom_30 yellow_bg">
+                    <div class="couter_icon">
+                        <div>
+                            <i class="fa fa-user"></i>
+                        </div>
+                    </div>
+                    <div class="counter_no">
+                        <div>
+                            <p class="total_no">New Leads <b>{{ $newLeads }}</b></p>
+                            <p>&nbsp;</p>
+                            <p class="head_couter">Today New Leads <b>{{ $todayNewLeads }}</b> </p>
+                            <p>&nbsp;</p><br>
+                            <a href="{{ route('admin.leads.index') }}" class="small-box-footer">View All <i
+                                    class="fa fa-arrow-circle-right"></i></a>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="row column1">
-                <div class="col-md-6 col-lg-3">
-                    <div class="full counter_section margin_bottom_30 yellow_bg">
-                        <div class="couter_icon">
-                            <div>
-                                <i class="fa fa-user"></i>
-                            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="full counter_section margin_bottom_30 blue1_bg">
+                    <div class="couter_icon">
+                        <div>
+                            <i class="fa fa-clock-o"></i>
                         </div>
-                        <div class="counter_no">
-                            <div>
-                                <p class="total_no">New Leads <b>{{ $newLeads }}</b></p><p>&nbsp;</p>
-                                <p class="head_couter">Today New Leads <b>{{ $todayNewLeads }}</b> </p>
-                                <p>&nbsp;</p><br>
-                                <a href="{{ route('admin.leads.index') }}" class="small-box-footer">View All <i
-                                        class="fa fa-arrow-circle-right"></i></a>
-                            </div>
+                    </div>
+                    <div class="counter_no">
+                        <div>
+                            <p class="total_no">Follow Up Leads <b>{{ $flowupLeads }}</b></p>
+                            <p>&nbsp;</p>
+                            <p class="head_couter">Today Follow Up Leads <b>{{ $todayFlowupLeads }}</b></p>
+                            <p>&nbsp;</p><br>
+                            <a href="{{ route('admin.followUp.index') }}" class="small-box-footer">View All <i
+                                    class="fa fa-arrow-circle-right"></i></a>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-6 col-lg-3">
-                    <div class="full counter_section margin_bottom_30 blue1_bg">
-                        <div class="couter_icon">
-                            <div>
-                                <i class="fa fa-clock-o"></i>
-                            </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="full counter_section margin_bottom_30 green_bg">
+                    <div class="couter_icon">
+                        <div>
+                            <i class="fa fa-cloud-download"></i>
                         </div>
-                        <div class="counter_no">
-                            <div>
-                                <p class="total_no">Follow Up Leads <b>{{ $flowupLeads }}</b></p><p>&nbsp;</p>
-                                <p class="head_couter">Today Follow Up Leads <b>{{ $todayFlowupLeads }}</b></p>
-                                <p>&nbsp;</p><br>
-                                <a href="{{ route('admin.followUp.index') }}" class="small-box-footer">View All <i
-                                        class="fa fa-arrow-circle-right"></i></a>
-                            </div>
+                    </div>
+                    <div class="counter_no">
+                        <div>
+                            <p class="total_no">Closed or Won Leads <b>{{ $closedorwonLeads }}</b></p>
+                            <p>&nbsp;</p>
+                            <p class="head_couter">Today Closed or Won Leads {{ $todayClosedorwonLeads }}</b></p>
+                            <p>&nbsp;</p>
+                            <a href="{{ route('admin.closedOrWon.index') }}" class="small-box-footer">View All <i
+                                    class="fa fa-arrow-circle-right"></i></a>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-6 col-lg-3">
-                    <div class="full counter_section margin_bottom_30 green_bg">
-                        <div class="couter_icon">
-                            <div>
-                                <i class="fa fa-cloud-download"></i>
-                            </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="full counter_section margin_bottom_30 red_bg">
+                    <div class="couter_icon">
+                        <div>
+                            <i class="fa fa-comments-o"></i>
                         </div>
-                        <div class="counter_no">
-                            <div>
-                                <p class="total_no">Closed or Won Leads <b>{{ $closedorwonLeads }}</b></p><p>&nbsp;</p>
-                                <p class="head_couter">Today Closed or Won Leads {{ $todayClosedorwonLeads }}</b></p>
-                                <p>&nbsp;</p>
-                                <a href="{{ route('admin.closedOrWon.index') }}" class="small-box-footer">View All <i
-                                        class="fa fa-arrow-circle-right"></i></a>
-                            </div>
+                    </div>
+                    <div class="counter_no">
+                        <div>
+                            <p class="total_no">Appointments Leads <b>{{ $demoLeads }}</b></p>
+                            <p>&nbsp;</p>
+                            <p class="head_couter">Today Appointments Leads <b>{{ $todayDemoLeads }}</b></p>
+                            <p>&nbsp;</p>
+                            <a href="{{ route('admin.appointments.index') }}" class="small-box-footer">View All <i
+                                    class="fa fa-arrow-circle-right"></i></a>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-6 col-lg-3">
-                    <div class="full counter_section margin_bottom_30 red_bg">
-                        <div class="couter_icon">
-                            <div>
-                                <i class="fa fa-comments-o"></i>
-                            </div>
-                        </div>
-                        <div class="counter_no">
-                            <div>
-                                <p class="total_no">Appointments Leads <b>{{ $demoLeads }}</b></p><p>&nbsp;</p>
-                                <p class="head_couter">Today Appointments Leads <b>{{ $todayDemoLeads }}</b></p><p>&nbsp;</p>
-                                <a href="{{ route('admin.appointments.index') }}" class="small-box-footer">View All <i
-                                        class="fa fa-arrow-circle-right"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            </div>
 
-                <div class="col-md-6 col-lg-3">
-                    <div class="full counter_section margin_bottom_30 purple_bg">
-                        <div class="couter_icon">
-                            <div>
-                                <i class="fa fa-user-plus"></i>
-                            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="full counter_section margin_bottom_30 purple_bg">
+                    <div class="couter_icon">
+                        <div>
+                            <i class="fa fa-user-plus"></i>
                         </div>
-                        <div class="counter_no">
-                            <div>
-                                <p class="total_no">{{ $assignedLeadsCount }}</p>
-                                <p class="head_couter">Assigned By Me</p>
-                                <p>&nbsp;</p>
-                                <a href="{{ route('admin.our-leads.index') }}" class="small-box-footer">
-                                    View All <i class="fa fa-arrow-circle-right"></i>
-                                </a>
-                            </div>
+                    </div>
+                    <div class="counter_no">
+                        <div>
+                            <p class="total_no">{{ $assignedLeadsCount }}</p>
+                            <p class="head_couter">Assigned By Me</p>
+                            <p>&nbsp;</p>
+                            <a href="{{ route('admin.our-leads.index') }}" class="small-box-footer">
+                                View All <i class="fa fa-arrow-circle-right"></i>
+                            </a>
                         </div>
                     </div>
                 </div>
+            </div>
 
 
-                {{-- @if(auth()->id() == 1 && $userLeadsCount)
-                <div class="col-md-12">
-                    <div class="full graph_head">
-                        <div class="heading1 margin_0">
-                            <h2>Leads Count per User</h2>
+
+            {{-- @if(auth()->id() == 1 && $userLeadsCount) --}}
+            {{-- @if(in_array(auth()->id(), [1, 2]) && $userLeadsCount) --}}
+
+
+            @foreach($userLeadsCount as $u)
+            <div class="col-md-6 col-lg-3">
+                <div class="full counter_section margin_bottom_30 purple_bg">
+                    <div class="couter_icon">
+                        <div>
+                            <i class="fa fa-user"></i>
                         </div>
                     </div>
-                    <div class="table_section padding_infor_info">
-                        <div class="table-responsive">
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th>User Name</th>
-                                        <th>Total Leads</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($userLeadsCount as $u)
-                                        <tr>
-                                            <td>{{ $u->name }}</td>
-                                            <td>{{ $u->total_leads }}</td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
+                    <div class="counter_no">
+                        <div>
+                            <p class="head_couter">{{ $u->name }}</p><br>
+                            <p class="total_no">Total Leads: <b>{{ $u->total_leads }}</b></p>
+                            <p class="today_no" style="font-size: 14px; color: #17eaea; text-align:center">Today Leads:
+                                {{ $u->today_leads }}</p>
+                            <a href="{{ route('admin.leads.index') }}" class="small-box-footer" style="color: #fff;">
+                                View Leads <i class="fa fa-arrow-circle-right"></i>
+                            </a>
                         </div>
                     </div>
                 </div>
-                @endif --}}
+            </div>
+            @endforeach
 
-                {{-- @if(auth()->id() == 1 && $userLeadsCount)
 
-                @foreach($userLeadsCount as $u)
-                    <div class="col-md-6 col-lg-3">
-                        <div class="full counter_section margin_bottom_30 purple_bg">
-                            <div class="couter_icon">
-                                <div>
-                                    <i class="fa fa-user"></i>
-                                </div>
-                            </div>
-                            <div class="counter_no">
-                                <div>
-                                    <p class="total_no">{{ $u->total_leads }}</p>
-                                    <p class="head_couter">{{ $u->name }}</p>
-                                    <p>&nbsp;</p>
-                                    <a href="{{ route('admin.leads.index') }}" class="small-box-footer">
-                                        View Leads <i class="fa fa-arrow-circle-right"></i>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                @endforeach
+            @endif
+        </div>
 
-    @endif --}}
-    {{-- @if(auth()->id() == 1 && $userLeadsCount) --}}
-    @if(in_array(auth()->id(), [1, 2]) && $userLeadsCount)
-    {{-- @dd('sdvfdgh'); --}}
-    @foreach($userLeadsCount as $u)
-        <div class="col-md-6 col-lg-3">
-            <div class="full counter_section margin_bottom_30 purple_bg">
-                <div class="couter_icon">
-                    <div>
-                        <i class="fa fa-user"></i>
+
+
+
+        {{-- new table --}}
+        @if (in_array(auth()->id(), [1, 2]))
+
+        <div class="row mb-3">
+            <div class="col-md-3">
+                <select id="dateFilter" class="form-control">
+                    <option value="total">Total</option>
+                    <option value="today">Today</option>
+                    <option value="yesterday">Yesterday</option>
+                    <option value="last_3_days">Last 3 Days</option>
+                    <option value="last_7_days">Last 7 Days</option>
+                    <option value="last_15_days">Last 15 Days</option>
+                    <option value="last_30_days">Last 30 Days</option>
+                    <option value="this_week">This Week</option>
+                    <option value="last_week">Last Week</option>
+                    <option value="this_month">This Month</option>
+                    <option value="last_month">Last Month</option>
+                    <option value="from_last_month">Last Month Onwards</option>
+                    <option value="custom">Custom Range</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select id="nameFilter" class="form-control">
+                    <option value="all">All Names</option>
+                    @foreach($assignedName as $user)
+                    <option value="{{ $user->name }}">{{ $user->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-md-2">
+                <input type="date" id="startDate" class="form-control" style="display: none;">
+            </div>
+            <div class="col-md-2">
+                <input type="date" id="endDate" class="form-control" style="display: none;">
+            </div>
+            <div class="col-md-2">
+                <button id="applyFilter" class="btn btn-primary">Search</button>
+            </div>
+        </div>
+
+        <div id="leadStatsTable">
+            <div class="table_section padding_infor_info">
+                <div class="table-responsive-sm">
+                    <table class="table table-bordered">
+                        <thead style="background-color: #033D75; color: white;">
+                            <tr>
+                                <th style="color: white">Name</th>
+                                <th style="color: white">New</th>
+                                <th style="color: white">Qualified</th>
+                                <th style="color: white">Follow Up</th>
+                                <th style="color: white">Appointments</th>
+                                <th style="color: white">Quotations</th>
+                                <th style="color: white">Won</th>
+                                <th style="color: white">Cancel</th>
+                                <th style="color: white">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($userLeads as $lead)
+                            <tr>
+                                <td><a href="#" class="count-link" data-status="New"
+                                        data-user="{{ $lead->name ?? 'all' }}">{{ $lead->new ?? 0 }}</a></td>
+                                <td><a href="#" class="count-link" data-status="New"
+                                        data-user="{{ $lead->name ?? 'all' }}">{{ $lead->new ?? 0 }}</a></td>
+                                <td><a href="#" class="count-link" data-status="Qualified"
+                                        data-user="{{ $lead->name ?? 'all' }}">{{ $lead->qualified ?? 0 }}</a></td>
+                                <td><a href="#" class="count-link" data-status="Follow Up"
+                                        data-user="{{ $lead->name ?? 'all' }}">{{ $lead->follow_up ?? 0 }}</a></td>
+                                <td><a href="#" class="count-link" data-status="appointments"
+                                        data-user="{{ $lead->name ?? 'all' }}">{{ $lead->appointments ?? 0 }}</a></td>
+                                <td><a href="#" class="count-link" data-status="quotation"
+                                        data-user="{{ $lead->name ?? 'all' }}">{{ $lead->quotation ?? 0 }}</a></td>
+                                <td><a href="#" class="count-link" data-status="Closed or Won"
+                                        data-user="{{ $lead->name ?? 'all' }}">{{ $lead->won ?? 0 }}</a></td>
+                                <td><a href="#" class="count-link" data-status="Dropped or Cancel"
+                                        data-user="{{ $lead->name ?? 'all' }}">{{ $lead->cancel ?? 0 }}</a></td>
+                                <td><a href="#" class="count-link" data-status="all"
+                                        data-user="{{ $lead->name ?? 'all' }}">{{ $lead->total ?? 0 }}</a></td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                        @if($totals)
+                        <tfoot style="background-color: #E9F3FC;">
+                            <tr>
+                                <th>Total</th>
+                                <th><a href="#" class="count-link" data-status="New">{{ $totals['new'] ?? 0 }}</a></th>
+                                <th><a href="#" class="count-link" data-status="Qualified">{{ $totals['qualified'] ?? 0
+                                        }}</a></th>
+                                <th><a href="#" class="count-link" data-status="Follow Up">{{ $totals['follow_up'] ?? 0
+                                        }}</a></th>
+                                <th><a href="#" class="count-link" data-status="appointments">{{ $totals['appointments']
+                                        ?? 0 }}</a></th>
+                                <th><a href="#" class="count-link" data-status="quotation">{{ $totals['quotation'] ?? 0
+                                        }}</a></th>
+                                <th><a href="#" class="count-link" data-status="Closed or Won">{{ $totals['won'] ?? 0
+                                        }}</a></th>
+                                <th><a href="#" class="count-link" data-status="Dropped or Cancel">{{ $totals['cancel']
+                                        ?? 0 }}</a></th>
+                                <th><a href="#" class="count-link" data-status="all">{{ $totals['total'] ?? 0 }}</a>
+                                </th>
+                            </tr>
+                        </tfoot>
+                        @endif
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        @endif
+
+
+        {{-- end --}}
+
+        <!-- table today leads section -->
+        <div class="col-md-12">
+            <div class="white_shd full margin_bottom_30">
+                <div class="full graph_head">
+                    <div class="heading1 margin_0">
+                        <h2>Today Follow Up Leads</h2>
                     </div>
                 </div>
-                <div class="counter_no">
-                    <div>
-                        <p class="head_couter">{{ $u->name }}</p><br>
-                        <p class="total_no">Total Leads: <b>{{ $u->total_leads }}</b></p>
-                        <p class="today_no" style="font-size: 14px; color: #17eaea; text-align:center">Today Leads: {{ $u->today_leads }}</p>
-                        <a href="{{ route('admin.leads.index') }}" class="small-box-footer" style="color: #fff;">
-                            View Leads <i class="fa fa-arrow-circle-right"></i>
-                        </a>
+                <div class="table_section padding_infor_info">
+                    <div class="table-responsive-sm">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        {{ trans('cruds.leads.fields.id') }}
+                                    </th>
+                                    <th>
+                                        {{ trans('cruds.leads.fields.name') }}
+                                    </th>
+
+                                    <th>
+                                        {{ trans('cruds.leads.fields.mobile') }}
+                                    </th>
+                                    <th>
+                                        {{ trans('cruds.leads.fields.assigned_name') }}
+                                    </th>
+                                    <th>
+                                        {{ trans('cruds.leads.fields.products') }}
+                                    </th>
+                                    <th>
+                                        {{ trans('cruds.leads.fields.status') }}
+                                    </th>
+                                    <th>
+                                        {{ trans('cruds.flowup.fields.follow_date') }}
+                                    </th>
+                                    <th>
+                                        {{ trans('cruds.flowup.fields.follow_time') }}
+                                    </th>
+                                    <th>
+                                        {{ trans('cruds.leads.fields.action') }}
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($followupLeads as $lead)
+                                <tr data-entry-id="{{ $lead->id }}">
+                                    <td>{{ $lead->id }}</td>
+                                    <td>{{ $lead->name }}</td>
+                                    <td>{{ $lead->mobile }}</td>
+                                    <td>{{ $lead->assign->name ?? 'Not Assigned' }}</td>
+                                    <td>
+                                        @if ($lead->products->isNotEmpty())
+                                        @foreach ($lead->products as $product)
+                                        <span class="badge badge-info">{{ $product->name }}</span>
+                                        @endforeach
+                                        @else
+                                        <span class="text-muted">No Products</span>
+                                        @endif
+                                    </td>
+
+                                    <td>
+                                        @if ($lead->status == 'New')
+                                        <span class="badge badge-info">New</span>
+                                        @elseif ($lead->status == 'Qualified')
+                                        <span class="badge badge-success">Qualified</span>
+                                        @elseif ($lead->status == 'Follow Up')
+                                        <span class="badge badge-warning">Follow Up</span>
+                                        @elseif ($lead->status == 'Demo')
+                                        <span class="badge badge-primary">Demo</span>
+                                        @elseif ($lead->status == 'Quotation / Ready To Buy')
+                                        <span class="badge badge-dark">Quotation / Ready To Buy</span>
+                                        @elseif ($lead->status == 'Closed or Won')
+                                        <span class="badge badge-success">Closed or Won</span>
+                                        @elseif ($lead->status == 'Dropped or Cancel')
+                                        <span class="badge badge-secondary">Dropped or Cancel</span>
+                                        @else
+                                        <span class="badge badge-light">Unknown</span>
+                                        @endif
+                                    </td>
+                                    <td>{{
+                                        optional(\Carbon\Carbon::parse($lead->follow_date))->format('d-m-Y')
+                                        }}
+                                    </td>
+                                    <td>{{
+                                        optional(\Carbon\Carbon::parse($lead->follow_time))->format('g:i
+                                        A') }}
+                                    </td>
+                                    <td>
+                                        <!-- Edit Button -->
+                                        <button class="btn btn-xs btn-warning edit-lead" data-id="{{ $lead->id }}"
+                                            data-name="{{ $lead->name }}" data-mobile="{{ $lead->mobile }}"
+                                            data-email="{{ $lead->email }}" data-address="{{ $lead->address }}"
+                                            data-industry="{{ $lead->industry }}" data-source="{{ $lead->source }}"
+                                            data-assigned_name="{{ $lead->assigned_name }}"
+                                            data-status="{{ $lead->status }}" data-purpose="{{ $lead->purpose }}"
+                                            data-remarks="{{ $lead->remarks }}"
+                                            data-follow_date="{{ $lead->follow_date }}"
+                                            data-follow_time="{{ $lead->follow_time }}"
+                                            data-products="{{ json_encode($lead->products->pluck('id')) }}"
+                                            data-toggle="modal" data-target="#editLeadsModal">
+                                            <i class="fa fa-edit"></i>
+                                        </button>
+
+                                    </td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
         </div>
-    @endforeach
-@endif
-
-
-            </div>
-               <!-- table today leads section -->
-               <div class="col-md-12">
-                <div class="white_shd full margin_bottom_30">
-                    <div class="full graph_head">
-                        <div class="heading1 margin_0">
-                            <h2>Today Follow Up Leads</h2>
-                        </div>
+        <!-- table section -->
+        <div class="modal fade" id="editLeadsModal" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">{{ trans('global.edit') }} {{
+                            trans('cruds.leads.title_singular') }}
+                        </h5>
+                        <button type="button" class="close" data-dismiss="modal">
+                            <span>&times;</span>
+                        </button>
                     </div>
-                    <div class="table_section padding_infor_info">
-                        <div class="table-responsive-sm">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>
-                                            {{ trans('cruds.leads.fields.id') }}
-                                        </th>
-                                        <th>
-                                            {{ trans('cruds.leads.fields.name') }}
-                                        </th>
+                    <div class="modal-body">
+                        <form id="editLeadForm" method="POST" action="#">
+                            @csrf
+                            @method('PUT')
 
-                                        <th>
-                                            {{ trans('cruds.leads.fields.mobile') }}
-                                        </th>
-                                        <th>
-                                            {{ trans('cruds.leads.fields.assigned_name') }}
-                                        </th>
-                                        <th>
-                                            {{ trans('cruds.leads.fields.products') }}
-                                        </th>
-                                        <th>
-                                            {{ trans('cruds.leads.fields.status') }}
-                                        </th>
-                                        <th>
-                                            {{ trans('cruds.flowup.fields.follow_date') }}
-                                        </th>
-                                        <th>
-                                            {{ trans('cruds.flowup.fields.follow_time') }}
-                                        </th>
-                                        <th>
-                                            {{ trans('cruds.leads.fields.action') }}
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach ($followupLeads as $lead)
-                                        <tr data-entry-id="{{ $lead->id }}">
-                                            <td>{{ $lead->id }}</td>
-                                            <td>{{ $lead->name }}</td>
-                                            <td>{{ $lead->mobile }}</td>
-                                            <td>{{ $lead->assign->name ?? 'Not Assigned' }}</td>
-                                            <td>
-                                                @if ($lead->products->isNotEmpty())
-                                                    @foreach ($lead->products as $product)
-                                                        <span class="badge badge-info">{{ $product->name }}</span>
-                                                    @endforeach
-                                                @else
-                                                    <span class="text-muted">No Products</span>
-                                                @endif
-                                            </td>
+                            <input type="hidden" id="edit_id" name="id">
 
-                                            <td>
-                                                @if ($lead->status == 'New')
-                                                    <span class="badge badge-info">New</span>
-                                                @elseif ($lead->status == 'Qualified')
-                                                    <span class="badge badge-success">Qualified</span>
-                                                @elseif ($lead->status == 'Follow Up')
-                                                    <span class="badge badge-warning">Follow Up</span>
-                                                @elseif ($lead->status == 'Demo')
-                                                    <span class="badge badge-primary">Demo</span>
-                                                @elseif ($lead->status == 'Quotation / Ready To Buy')
-                                                    <span class="badge badge-dark">Quotation / Ready To Buy</span>
-                                                @elseif ($lead->status == 'Closed or Won')
-                                                    <span class="badge badge-success">Closed or Won</span>
-                                                @elseif ($lead->status == 'Dropped or Cancel')
-                                                    <span class="badge badge-secondary">Dropped or Cancel</span>
-                                                @else
-                                                    <span class="badge badge-light">Unknown</span>
-                                                @endif
-                                            </td>
-                                            <td>{{ optional(\Carbon\Carbon::parse($lead->follow_date))->format('d-m-Y') }}
-                                            </td>
-                                            <td>{{ optional(\Carbon\Carbon::parse($lead->follow_time))->format('g:i A') }}
-                                            </td>
-                                            <td>
-                                                  <!-- Edit Button -->
-                                                <button class="btn btn-xs btn-warning edit-lead" data-id="{{ $lead->id }}"
-                                                data-name="{{ $lead->name }}" data-mobile="{{ $lead->mobile }}"
-                                                data-email="{{ $lead->email }}" data-address="{{ $lead->address }}" data-industry="{{ $lead->industry }}"
-                                                data-source="{{ $lead->source }}" data-assigned_name="{{ $lead->assigned_name }}"
-                                                data-status="{{ $lead->status }}" data-purpose="{{ $lead->purpose }}"
-                                                data-remarks="{{ $lead->remarks }}" data-follow_date="{{ $lead->follow_date }}"
-                                                data-follow_time="{{ $lead->follow_time }}"
-                                                data-products="{{ json_encode($lead->products->pluck('id')) }}" data-toggle="modal"
-                                                data-target="#editLeadsModal">
-                                                <i class="fa fa-edit"></i>
-                                                </button>
-
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- table section -->
-            <div class="modal fade" id="editLeadsModal" tabindex="-1" role="dialog" aria-hidden="true">
-                <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title">{{ trans('global.edit') }} {{ trans('cruds.leads.title_singular') }}</h5>
-                            <button type="button" class="close" data-dismiss="modal">
-                                <span>&times;</span>
-                            </button>
-                        </div>
-                        <div class="modal-body">
-                            <form id="editLeadForm" method="POST" action="#">
-                                @csrf
-                                @method('PUT')
-
-                                <input type="hidden" id="edit_id" name="id">
-
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label class="required" for="edit_name">{{ trans('cruds.leads.fields.name') }}</label>
-                                            <input type="text" id="edit_name" class="form-control" name="name" required maxlength="30">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label class="required" for="edit_mobile">{{ trans('cruds.leads.fields.mobile') }}</label>
-                                            {{-- <input type="text" id="edit_mobile" class="form-control" name="mobile" required> --}}
-                                            <input type="text" id="edit_mobile" name="mobile" class="form-control" required maxlength="12" pattern="\d{10}" title="Please enter a 12-digit mobile number" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 12)">
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label for="edit_email">{{ trans('cruds.leads.fields.email') }}</label>
-                                            <input type="email" id="edit_email" class="form-control" name="email" maxlength="100">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label for="edit_address">{{ trans('cruds.leads.fields.address') }}</label>
-                                            <input type="text" id="edit_address" class="form-control" name="address"
-                                                >
-                                        </div>
-                                    </div>
-                                </div>
-
-
+                            <div class="row">
+                                <div class="col-md-6">
                                     <div class="form-group">
-                                        <label for="edit_industry">{{ trans('cruds.leads.fields.industry') }}</label>
-                                        <input type="text" id="edit_industry" class="form-control" name="industry" maxlength="100">
+                                        <label class="required" for="edit_name">{{
+                                            trans('cruds.leads.fields.name')
+                                            }}</label>
+                                        <input type="text" id="edit_name" class="form-control" name="name" required
+                                            maxlength="30">
                                     </div>
-
-
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label class="required" for="product_idss">Select Products</label>
-                                            <select class="form-control select2" name="product_ids[]" id="edit_product_ids"
-                                                multiple required>
-                                                @foreach ($products as $product)
-                                                    <option value="{{ $product->id }}">
-                                                        {{ $product->name }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
-                                        </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="required" for="edit_mobile">{{
+                                            trans('cruds.leads.fields.mobile')
+                                            }}</label>
+                                        {{-- <input type="text" id="edit_mobile" class="form-control" name="mobile"
+                                            required> --}}
+                                        <input type="text" id="edit_mobile" name="mobile" class="form-control" required
+                                            maxlength="12" pattern="\d{10}"
+                                            title="Please enter a 12-digit mobile number"
+                                            oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 12)">
                                     </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label for="assigned_name">{{ trans('cruds.leads.fields.assigned_name') }}</label>
-                                            <select name="assigned_name" id="edit_assigned_name" class="form-control">
-                                                <option value="">{{ trans('global.pleaseSelect') }}</option>
-                                                @foreach ($assignedName as $user)
-                                                    <option value="{{ $user->id }}"
-                                                        {{ isset($lead) && $lead->assigned_name == $user->id ? 'selected' : '' }}>
-                                                        {{ $user->name }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
+                                </div>
+                            </div>
 
-                                        </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="edit_email">{{ trans('cruds.leads.fields.email')
+                                            }}</label>
+                                        <input type="email" id="edit_email" class="form-control" name="email"
+                                            maxlength="100">
                                     </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="edit_address">{{ trans('cruds.leads.fields.address')
+                                            }}</label>
+                                        <input type="text" id="edit_address" class="form-control" name="address">
+                                    </div>
+                                </div>
+                            </div>
 
 
+                            <div class="form-group">
+                                <label for="edit_industry">{{ trans('cruds.leads.fields.industry')
+                                    }}</label>
+                                <input type="text" id="edit_industry" class="form-control" name="industry"
+                                    maxlength="100">
+                            </div>
 
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="required" for="product_idss">Select
+                                            Products</label>
+                                        <select class="form-control select2" name="product_ids[]" id="edit_product_ids"
+                                            multiple required>
+                                            @foreach ($products as $product)
+                                            <option value="{{ $product->id }}">
+                                                {{ $product->name }}
+                                            </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
                                 </div>
 
-                                <div class="row">
 
+                            </div>
 
+                            <div class="row">
 
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label class="required" for="edit_status">{{ trans('cruds.leads.fields.status') }}</label>
-                                            <select name="status" id="edit_status" class="form-control" required>
-                                                <option value="New">New</option>
-                                                <option value="Qualified">Qualified</option>
-                                                <option value="Follow Up">Follow Up</option>
-                                                <option value="Online Demo">Online Demo</option>
-                                                <option value="Offline Demo">Offline Demo</option>
-                                                <option value="Onsite Visit">Onsite Visit</option>
-                                                <option value="Quotation / Ready To Buy">Quotation / Ready To Buy</option>
-                                                <option value="Closed or Won">Closed or Won</option>
-                                                <option value="Dropped or Cancel">Dropped or Cancel</option>
-                                            </select>
-                                        </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="required" for="edit_status">{{
+                                            trans('cruds.leads.fields.status')
+                                            }}</label>
+                                        <select name="status" id="edit_status" class="form-control" required>
+                                            <option value="New">New</option>
+                                            <option value="Qualified">Qualified</option>
+                                            <option value="Follow Up">Follow Up</option>
+                                            <option value="Online Demo">Online Demo</option>
+                                            <option value="Offline Demo">Offline Demo</option>
+                                            <option value="Onsite Visit">Onsite Visit</option>
+                                            <option value="Quotation / Ready To Buy">Quotation / Ready
+                                                To Buy</option>
+                                            <option value="Closed or Won">Closed or Won</option>
+                                            <option value="Dropped or Cancel">Dropped or Cancel</option>
+                                        </select>
                                     </div>
+                                </div>
 
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label class="required" for="edit_source">{{ trans('cruds.leads.fields.source') }}</label>
-                                            <select name="source" id="edit_source" class="form-control" required disabled>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="required" for="edit_source">{{
+                                            trans('cruds.leads.fields.source')
+                                            }}</label>
+                                        <select name="source" id="edit_source" class="form-control" required disabled>
                                             <option value="Facebook">Facebook</option>
                                             <option value="Instagram">Instagram</option>
                                             <option value="Twitter">Twitter (X)</option>
@@ -417,267 +498,365 @@
                                             <option value="Telegram">Telegram</option>
                                             <option value="CA / auditor">CA / auditor</option>
                                             <option value="Marketing">Marketing</option>
-                                            <option value="Customer Reference">Customer Reference</option>
+                                            <option value="Customer Reference">Customer Reference
+                                            </option>
                                             <option value="Just Dial">Just Dial</option>
-                                            </select>
-                                        </div>
+                                        </select>
                                     </div>
                                 </div>
+                            </div>
 
 
-                                {{-- Follow Up Fields --}}
-                                <div class="row" id="edit_followUpFields" style="display: none;">
+                            {{-- Follow Up Fields --}}
+                            <div class="row" id="edit_followUpFields" style="display: none;">
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label class="required" for="edit_follow_date">{{ trans('cruds.flowup.fields.follow_date') }}</label>
-                                        <input type="date" name="follow_date" id="edit_follow_date" class="form-control">
+                                        <label class="required" for="edit_follow_date">{{
+                                            trans('cruds.flowup.fields.follow_date') }}</label>
+                                        <input type="date" name="follow_date" id="edit_follow_date"
+                                            class="form-control">
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label class="required" for="edit_follow_time">{{ trans('cruds.flowup.fields.follow_time') }}</label>
-                                        <input type="time" name="follow_time" id="edit_follow_time" class="form-control">
+                                        <label class="required" for="edit_follow_time">{{
+                                            trans('cruds.flowup.fields.follow_time') }}</label>
+                                        <input type="time" name="follow_time" id="edit_follow_time"
+                                            class="form-control">
                                     </div>
                                 </div>
-                                </div>
+                            </div>
 
-                                <div class="form-group">
-                                    <label for="edit_purpose">{{ trans('cruds.leads.fields.purpose') }}</label>
-                                    <textarea id="edit_purpose" class="form-control" name="purpose" rows="2"></textarea>
-                                </div>
+                            <div class="form-group">
+                                <label for="edit_purpose">{{ trans('cruds.leads.fields.purpose')
+                                    }}</label>
+                                <textarea id="edit_purpose" class="form-control" name="purpose" rows="2"></textarea>
+                            </div>
 
-                                <div class="form-group">
-                                    <label for="edit_remarks">{{ trans('cruds.leads.fields.remarks') }}</label>
-                                    <textarea id="edit_remarks" class="form-control" name="remarks" rows="2"></textarea>
-                                </div>
+                            <div class="form-group">
+                                <label for="edit_remarks">{{ trans('cruds.leads.fields.remarks')
+                                    }}</label>
+                                <textarea id="edit_remarks" class="form-control" name="remarks" rows="2"></textarea>
+                            </div>
 
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary"
-                                        data-dismiss="modal">{{ trans('global.cancel') }}</button>
-                                    <button type="submit" class="btn btn-primary">{{ trans('global.save') }}</button>
-                                </div>
-                            </form>
-                        </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">{{
+                                    trans('global.cancel') }}</button>
+                                <button type="submit" class="btn btn-primary">{{ trans('global.save')
+                                    }}</button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
+        </div>
 
 
-            <!-- table today leads section -->
-            <div class="col-md-12">
-                <div class="white_shd full margin_bottom_30">
-                    <div class="full graph_head">
-                        <div class="heading1 margin_0">
-                            <h2>Today Leads in a CRM</h2>
-                        </div>
+        <!-- table today leads section -->
+        <div class="col-md-12">
+            <div class="white_shd full margin_bottom_30">
+                <div class="full graph_head">
+                    <div class="heading1 margin_0">
+                        <h2>Today Leads in a CRM</h2>
                     </div>
-                    <div class="table_section padding_infor_info">
-                        <div class="table-responsive-sm">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>
-                                            {{ trans('cruds.leads.fields.id') }}
-                                        </th>
-                                        <th>
-                                            {{ trans('cruds.leads.fields.name') }}
-                                        </th>
+                </div>
+                <div class="table_section padding_infor_info">
+                    <div class="table-responsive-sm">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        {{ trans('cruds.leads.fields.id') }}
+                                    </th>
+                                    <th>
+                                        {{ trans('cruds.leads.fields.name') }}
+                                    </th>
 
-                                        <th>
-                                            {{ trans('cruds.leads.fields.mobile') }}
-                                        </th>
-                                        <th>
-                                            {{ trans('cruds.leads.fields.assigned_name') }}
-                                        </th>
-                                        <th>
-                                            {{ trans('cruds.leads.fields.products') }}
-                                        </th>
-                                        <th>
-                                            {{ trans('cruds.leads.fields.status') }}
-                                        </th>
-                                        <th>
-                                            {{ trans('cruds.leads.fields.created_at') }}
-                                        </th>
+                                    <th>
+                                        {{ trans('cruds.leads.fields.mobile') }}
+                                    </th>
+                                    <th>
+                                        {{ trans('cruds.leads.fields.assigned_name') }}
+                                    </th>
+                                    <th>
+                                        {{ trans('cruds.leads.fields.products') }}
+                                    </th>
+                                    <th>
+                                        {{ trans('cruds.leads.fields.status') }}
+                                    </th>
+                                    <th>
+                                        {{ trans('cruds.leads.fields.created_at') }}
+                                    </th>
 
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach ($leads as $lead)
-                                        <tr data-entry-id="{{ $lead->id }}">
-                                            <td>{{ $lead->id }}</td>
-                                            <td>{{ $lead->name }}</td>
-                                            <td>{{ $lead->mobile }}</td>
-                                            <td>{{ $lead->assign->name ?? 'Not Assigned' }}</td>
-                                            <td>
-                                                @if ($lead->products->isNotEmpty())
-                                                    @foreach ($lead->products as $product)
-                                                        <span class="badge badge-info">{{ $product->name }}</span>
-                                                    @endforeach
-                                                @else
-                                                    <span class="text-muted">No Products</span>
-                                                @endif
-                                            </td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($leads as $lead)
+                                <tr data-entry-id="{{ $lead->id }}">
+                                    <td>{{ $lead->id }}</td>
+                                    <td>{{ $lead->name }}</td>
+                                    <td>{{ $lead->mobile }}</td>
+                                    <td>{{ $lead->assign->name ?? 'Not Assigned' }}</td>
+                                    <td>
+                                        @if ($lead->products->isNotEmpty())
+                                        @foreach ($lead->products as $product)
+                                        <span class="badge badge-info">{{ $product->name }}</span>
+                                        @endforeach
+                                        @else
+                                        <span class="text-muted">No Products</span>
+                                        @endif
+                                    </td>
 
-                                            <td>
-                                                @if ($lead->status == 'New')
-                                                    <span class="badge badge-info">New</span>
-                                                @elseif ($lead->status == 'Qualified')
-                                                    <span class="badge badge-success">Qualified</span>
-                                                @elseif ($lead->status == 'Follow Up')
-                                                    <span class="badge badge-warning">Follow Up</span>
-                                                @elseif ($lead->status == 'Demo')
-                                                    <span class="badge badge-primary">Demo</span>
-                                                @elseif ($lead->status == 'Quotation / Ready To Buy')
-                                                    <span class="badge badge-dark">Quotation / Ready To Buy</span>
-                                                @elseif ($lead->status == 'Closed or Won')
-                                                    <span class="badge badge-success">Closed or Won</span>
-                                                @elseif ($lead->status == 'Dropped or Cancel')
-                                                    <span class="badge badge-secondary">Dropped or Cancel</span>
-                                                @else
-                                                    <span class="badge badge-light">Unknown</span>
-                                                @endif
-                                            </td>
+                                    <td>
+                                        @if ($lead->status == 'New')
+                                        <span class="badge badge-info">New</span>
+                                        @elseif ($lead->status == 'Qualified')
+                                        <span class="badge badge-success">Qualified</span>
+                                        @elseif ($lead->status == 'Follow Up')
+                                        <span class="badge badge-warning">Follow Up</span>
+                                        @elseif ($lead->status == 'Demo')
+                                        <span class="badge badge-primary">Demo</span>
+                                        @elseif ($lead->status == 'Quotation / Ready To Buy')
+                                        <span class="badge badge-dark">Quotation / Ready To Buy</span>
+                                        @elseif ($lead->status == 'Closed or Won')
+                                        <span class="badge badge-success">Closed or Won</span>
+                                        @elseif ($lead->status == 'Dropped or Cancel')
+                                        <span class="badge badge-secondary">Dropped or Cancel</span>
+                                        @else
+                                        <span class="badge badge-light">Unknown</span>
+                                        @endif
+                                    </td>
 
-                                            <td>{{ optional(\Carbon\Carbon::parse($lead->created_at))->format('d-m-Y g:i A') }}
-                                            </td>
-                                            <td>
+                                    <td>{{
+                                        optional(\Carbon\Carbon::parse($lead->created_at))->format('d-m-Y
+                                        g:i A') }}
+                                    </td>
+                                    <td>
 
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
+                                    </td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
-            <!-- table section -->
+        </div>
+        <!-- table section -->
 
-            <!-- progress bar -->
-            <div class="col-md-12">
-                <div class="white_shd full margin_bottom_30">
-                    <div class="full graph_head">
-                        <div class="heading1 margin_0">
-                            <h2>Recent leads Bar </h2>
-                        </div>
+        <!-- progress bar -->
+        <div class="col-md-12">
+            <div class="white_shd full margin_bottom_30">
+                <div class="full graph_head">
+                    <div class="heading1 margin_0">
+                        <h2>Recent leads Bar </h2>
                     </div>
-                    <div class="full progress_bar_inner">
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="progress_bar">
-                                    <!-- Skill Bars -->
+                </div>
+                <div class="full progress_bar_inner">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="progress_bar">
+                                <!-- Skill Bars -->
 
-                                    <span class="skill">Total Leads <span
-                                            class="info_valume">&nbsp;{{ $totalLeads }}%</span></span>
-                                    <div class="progress skill-bar ">
-                                        <div class="progress-bar progress-bar-animated progress-bar-striped"
-                                            role="progressbar" aria-valuenow="{{ $totalLeads }}" aria-valuemin="0"
-                                            aria-valuemax="100" style="width: {{ $totalLeads }}%;">
-                                        </div>
+                                <span class="skill">Total Leads <span class="info_valume">&nbsp;{{
+                                        $totalLeads
+                                        }}%</span></span>
+                                <div class="progress skill-bar ">
+                                    <div class="progress-bar progress-bar-animated progress-bar-striped"
+                                        role="progressbar" aria-valuenow="{{ $totalLeads }}" aria-valuemin="0"
+                                        aria-valuemax="100" style="width: {{ $totalLeads }}%;">
                                     </div>
-
-                                    <span class="skill">New Leads <span
-                                            class="info_valume">&nbsp;{{ $newLeads }}%</span></span>
-                                    <div class="progress skill-bar">
-                                        <div class="progress-bar progress-bar-animated progress-bar-striped"
-                                            role="progressbar" aria-valuenow="62" aria-valuemin="0" aria-valuemax="100"
-                                            style="width: {{ $newLeads }}%;">
-                                        </div>
-                                    </div>
-
-
-                                    <span class="skill">Qualified Leads <span
-                                            class="info_valume">&nbsp;{{ $qualifiedLeads }}%</span></span>
-                                    <div class="progress skill-bar">
-                                        <div class="progress-bar progress-bar-animated progress-bar-striped"
-                                            role="progressbar" aria-valuenow="54" aria-valuemin="0" aria-valuemax="100"
-                                            style="width: {{ $qualifiedLeads }}%;">
-                                        </div>
-                                    </div>
-
-                                    <span class="skill">Follow Up Leads <span
-                                            class="info_valume">&nbsp;{{ $flowupLeads }}%</span></span>
-                                    <div class="progress skill-bar">
-                                        <div class="progress-bar progress-bar-animated progress-bar-striped"
-                                            role="progressbar" aria-valuenow="54" aria-valuemin="0" aria-valuemax="100"
-                                            style="width: {{ $flowupLeads }}%;">
-                                        </div>
-                                    </div>
-
-                                    <span class="skill">Appointments Leads <span
-                                            class="info_valume">&nbsp;{{ $demoLeads }}%</span></span>
-                                    <div class="progress skill-bar">
-                                        <div class="progress-bar progress-bar-animated progress-bar-striped"
-                                            role="progressbar" aria-valuenow="54" aria-valuemin="0" aria-valuemax="100"
-                                            style="width: {{ $demoLeads }}%;">
-                                        </div>
-                                    </div>
-
-                                    <span class="skill">Quotation / Ready To Buy Leads <span
-                                            class="info_valume">&nbsp;{{ $closedorwonLeads }}%</span></span>
-                                    <div class="progress skill-bar">
-                                        <div class="progress-bar progress-bar-animated progress-bar-striped"
-                                            role="progressbar" aria-valuenow="54" aria-valuemin="0" aria-valuemax="100"
-                                            style="width: {{ $closedorwonLeads }}%;">
-                                        </div>
-                                    </div>
-
-
-                                    <span class="skill">Closed or Won Leads <span
-                                            class="info_valume">&nbsp;{{ $cancelLeads }}%</span></span>
-                                    <div class="progress skill-bar">
-                                        <div class="progress-bar progress-bar-animated progress-bar-striped"
-                                            role="progressbar" aria-valuenow="82" aria-valuemin="0" aria-valuemax="100"
-                                            style="width: {{ $cancelLeads }}%;">
-                                        </div>
-                                    </div>
-
-                                    <span class="skill">Dropped or Cancel Leads <span
-                                            class="info_valume">&nbsp;{{ $cancelLeads }}%</span></span>
-                                    <div class="progress skill-bar">
-                                        <div class="progress-bar progress-bar-animated progress-bar-striped"
-                                            role="progressbar" aria-valuenow="54" aria-valuemin="0" aria-valuemax="100"
-                                            style="width: {{ $cancelLeads }}%;">
-                                        </div>
-                                    </div>
-
                                 </div>
+
+                                <span class="skill">New Leads <span class="info_valume">&nbsp;{{
+                                        $newLeads
+                                        }}%</span></span>
+                                <div class="progress skill-bar">
+                                    <div class="progress-bar progress-bar-animated progress-bar-striped"
+                                        role="progressbar" aria-valuenow="62" aria-valuemin="0" aria-valuemax="100"
+                                        style="width: {{ $newLeads }}%;">
+                                    </div>
+                                </div>
+
+
+                                <span class="skill">Qualified Leads <span class="info_valume">&nbsp;{{
+                                        $qualifiedLeads
+                                        }}%</span></span>
+                                <div class="progress skill-bar">
+                                    <div class="progress-bar progress-bar-animated progress-bar-striped"
+                                        role="progressbar" aria-valuenow="54" aria-valuemin="0" aria-valuemax="100"
+                                        style="width: {{ $qualifiedLeads }}%;">
+                                    </div>
+                                </div>
+
+                                <span class="skill">Follow Up Leads <span class="info_valume">&nbsp;{{
+                                        $flowupLeads
+                                        }}%</span></span>
+                                <div class="progress skill-bar">
+                                    <div class="progress-bar progress-bar-animated progress-bar-striped"
+                                        role="progressbar" aria-valuenow="54" aria-valuemin="0" aria-valuemax="100"
+                                        style="width: {{ $flowupLeads }}%;">
+                                    </div>
+                                </div>
+
+                                <span class="skill">Appointments Leads <span class="info_valume">&nbsp;{{ $demoLeads
+                                        }}%</span></span>
+                                <div class="progress skill-bar">
+                                    <div class="progress-bar progress-bar-animated progress-bar-striped"
+                                        role="progressbar" aria-valuenow="54" aria-valuemin="0" aria-valuemax="100"
+                                        style="width: {{ $demoLeads }}%;">
+                                    </div>
+                                </div>
+
+                                <span class="skill">Quotation / Ready To Buy Leads <span class="info_valume">&nbsp;{{
+                                        $closedorwonLeads }}%</span></span>
+                                <div class="progress skill-bar">
+                                    <div class="progress-bar progress-bar-animated progress-bar-striped"
+                                        role="progressbar" aria-valuenow="54" aria-valuemin="0" aria-valuemax="100"
+                                        style="width: {{ $closedorwonLeads }}%;">
+                                    </div>
+                                </div>
+
+
+                                <span class="skill">Closed or Won Leads <span class="info_valume">&nbsp;{{ $cancelLeads
+                                        }}%</span></span>
+                                <div class="progress skill-bar">
+                                    <div class="progress-bar progress-bar-animated progress-bar-striped"
+                                        role="progressbar" aria-valuenow="82" aria-valuemin="0" aria-valuemax="100"
+                                        style="width: {{ $cancelLeads }}%;">
+                                    </div>
+                                </div>
+
+                                <span class="skill">Dropped or Cancel Leads <span class="info_valume">&nbsp;{{
+                                        $cancelLeads }}%</span></span>
+                                <div class="progress skill-bar">
+                                    <div class="progress-bar progress-bar-animated progress-bar-striped"
+                                        role="progressbar" aria-valuenow="54" aria-valuemin="0" aria-valuemax="100"
+                                        style="width: {{ $cancelLeads }}%;">
+                                    </div>
+                                </div>
+
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <!-- end progress bar -->
-
-
-            <div class="container-fluid">
-                <div class="footer">
-                    <p>Copyright © 2025 All rights reserved | Desigined and hosted
-                        <a href="https://isaral.in/">by iSaral Business
-                            Solutions Pvt Ltd</a>
-                    </p>
-                </div>
-            </div>
-
         </div>
-        <!-- footer -->
-        {{-- <div class="container-fluid">
+        <!-- end progress bar -->
+
+
+        <div class="container-fluid">
             <div class="footer">
                 <p>Copyright © 2025 All rights reserved | Desigined and hosted
                     <a href="https://isaral.in/">by iSaral Business
                         Solutions Pvt Ltd</a>
                 </p>
             </div>
-        </div> --}}
+        </div>
+
     </div>
+</div>
 @endsection
 
 @section('scripts')
-    @parent
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+@parent
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
-    <script>
-        $(function() {
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- Bootstrap 4 CSS -->
+
+
+<script>
+    $(document).ready(function() {
+
+    // Initialize with default filters
+    applyFilters();
+
+    // Show/hide date inputs based on filter selection
+    $('#dateFilter').on('change', function() {
+        if ($(this).val() === 'custom') {
+            $('#startDate, #endDate').show();
+        } else {
+            $('#startDate, #endDate').hide();
+        }
+    });
+
+    // Apply filter button click handler
+    $('#applyFilter').on('click', function() {
+        applyFilters();
+    });
+
+    // Function to apply filters
+    function applyFilters() {
+        let filter = $('#dateFilter').val();
+        let start = $('#startDate').val();
+        let end = $('#endDate').val();
+        let name = $('#nameFilter').val();
+
+        // Validate custom dates if custom filter is selected
+        if (filter === 'custom' && (!start || !end)) {
+            alert('Please select both start and end dates for custom range');
+            return;
+        }
+
+        $.ajax({
+            url: "{{ route('admin.filter.leads') }}",
+            method: "GET",
+            data: {
+                filter: filter,
+                start: start,
+                end: end,
+                name: name
+            },
+            beforeSend: function() {
+                $('#leadStatsTable').html('<div class="text-center py-4"><i class="fas fa-spinner fa-spin"></i> Loading...</div>');
+            },
+            success: function(response) {
+                if (response.html) {
+                    $('#leadStatsTable').html(response.html);
+                    // Reattach click handlers after table reload
+                    attachCountLinkHandlers();
+                } else if (response.error) {
+                    $('#leadStatsTable').html('<div class="alert alert-danger">' + response.error + '</div>');
+                } else {
+                    $('#leadStatsTable').html('<div class="alert alert-warning">No data found for the selected filter</div>');
+                }
+            },
+            error: function(xhr) {
+                let errorMsg = 'Error loading data';
+                if (xhr.responseJSON && xhr.responseJSON.error) {
+                    errorMsg = xhr.responseJSON.error;
+                }
+                $('#leadStatsTable').html('<div class="alert alert-danger">' + errorMsg + '</div>');
+                console.error('Error:', xhr.responseText);
+            }
+        });
+    }
+
+    // Function to attach click handlers to count links
+    function attachCountLinkHandlers() {
+        $(document).off('click', '.count-link').on('click', '.count-link', function(e) {
+            e.preventDefault();
+
+            const status = $(this).data('status');
+            const userName = $(this).data('user') || 'all';
+            const currentFilter = $('#dateFilter').val();
+            const startDate = $('#startDate').val();
+            const endDate = $('#endDate').val();
+            const nameFilter = $('#nameFilter').val();
+console.log(status, userName, currentFilter, startDate, endDate, nameFilter);
+window.location.href = "{{ route('admin.filter.leads.details') }}?status=" + status + "&user=" + userName + "&filter=" + currentFilter + "&start=" + startDate + "&end=" + endDate + "&name=" + nameFilter;
+
+        });
+    }
+});
+
+
+</script>
+
+<script>
+    $(function() {
             let dtButtons = $.extend(true, [], $.fn.dataTable.defaults.buttons)
             @can('lead_delete')
                 let deleteButtonTrans =
@@ -844,5 +1023,5 @@ $('#edit_status').on('change', function () {
             // Show modal
             $('#viewLeadsModal').modal('show');
         });
-    </script>
-    @endsection
+</script>
+@endsection

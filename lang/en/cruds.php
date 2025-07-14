@@ -93,6 +93,10 @@ return [
             'follow_time_helper'  => ' ',
             'follow_date'                 => 'Follow Date',
             'follow_date_helper'  => ' ',
+            'call_back_time'                 => 'Call Back Time',
+            'call_back_time_helper'  => ' ',
+            'call_back_date'                 => 'Call Back Date',
+            'call_back_date_helper'  => ' ',
         ],
     ],
 

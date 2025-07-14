@@ -26,7 +26,14 @@ class Products extends Model
         'description',
         'price',
         'tax',
+        'features', // 'percentage' or 'fixed'
         'assigned_name',
+    ];
+
+     protected $casts = [
+        'price' => 'float',
+        'tax' => 'float',
+        'features' => 'array'
     ];
 
     protected function serializeDate(DateTimeInterface $date)
@@ -36,6 +43,16 @@ class Products extends Model
     public function category()
     {
         return $this->belongsTo(ProductCategory::class, 'category_id');
+    }
+
+   public function getTaxAmountAttribute()
+    {
+        return $this->price * ($this->tax / 100);
+    }
+
+    public function getTotalAmountAttribute()
+    {
+        return $this->price + $this->tax_amount;
     }
 
 

@@ -164,7 +164,6 @@ class LeadsController extends Controller
     public function show(Leads $lead)
     {
         $products = $lead->products()->select('name', 'pivot.price')->get();
-        // dd('in');
         return view('admin.leads.show', compact('lead'));
     }
 
@@ -173,6 +172,7 @@ class LeadsController extends Controller
      */
     public function edit(Leads $lead)
     {
+
         $products = Products::all();
         $selectedProducts = $lead->products->pluck('id')->toArray();
         $assignedName = User::select('id', 'name')->distinct()->get();
@@ -195,6 +195,8 @@ class LeadsController extends Controller
             'status' => 'required|string',
             'follow_date' => 'nullable|date',
             'follow_time' => 'nullable',
+            'call_back_date' => 'nullable|date',
+            'call_back_time' => 'nullable',
             'source' => 'nullable|string',
             'assigned_name' => 'required|exists:users,id', // Ensure assigned_name exists
             'product_ids' => 'required|array', // Ensure product_ids is an array
@@ -214,7 +216,7 @@ class LeadsController extends Controller
         }, function ($query) {
             return $query->whereNull('email');
         })
-        ->where('id', '!=', $lead->id) // ⛔ exclude the current lead
+        ->where('id', '!=', $lead->id) 
         ->get();
 
     foreach ($duplicateLeads as $existingLead) {
@@ -236,6 +238,9 @@ class LeadsController extends Controller
         // Convert empty follow_date/time to null explicitly
         $validatedData['follow_date'] = $request->filled('follow_date') ? $request->follow_date : null;
         $validatedData['follow_time'] = $request->filled('follow_time') ? $request->follow_time : null;
+
+        $validatedData['call_back_date'] = $request->filled('call_back_date') ? $request->call_back_date : null;
+        $validatedData['call_back_time'] = $request->filled('call_back_time') ? $request->call_back_time : null;
 
         // Handle opened_at manually
         if ($request->has('edit_opened_at')) {

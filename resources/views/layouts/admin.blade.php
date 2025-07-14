@@ -143,7 +143,7 @@
                                             {{-- <div class="dropdown-menu dropdown-menu-right">
 
                                                 <a class="dropdown-item" href="{{ route('profile.password.edit') }}">
-                                                    <i class="fa-fw fas fa-user"></i> &nbsp; {{ trans('global.my_profile') }}
+                                                    <i class="fa-fw fas fa-user"></i> &nbsp; cc
                                                 </a>
 
                                                 <a class="dropdown-item" href="{{ route('profile.password.change-password') }}">
