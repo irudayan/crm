@@ -227,6 +227,16 @@ class Leads extends Model
         return $this->belongsTo(User::class, 'last_updated_by');
     }
 
+    /**
+     * Calculate the total amount including tax.
+     *
+     * This accessor calculates the total amount by adding the tax to the
+     * subtotal. If the `quotation_amount` or `quotation_tax` is not set,
+     * it defaults to 0.
+     *
+     * @return float The total amount including tax.
+     */
+
     public function getTotalAmountAttribute()
     {
         $subtotal = $this->quotation_amount ?? 0;

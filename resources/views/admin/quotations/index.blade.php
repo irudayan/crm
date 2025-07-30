@@ -150,7 +150,6 @@
 
                             {{-- quotation --}}
 
-
                             <button class="btn btn-xs btn-secondary edit-quotation" data-id="{{ $lead->id }}"
                                 data-name="{{ $lead->name }}" data-mobile="{{ $lead->mobile }}"
                                 data-email="{{ $lead->email }}" data-address="{{ $lead->address }}"
@@ -161,10 +160,10 @@
                                 data-quotation_tax="{{ $lead->quotation_tax }}"
                                 data-quotation_reference="{{ $lead->quotation_reference }}"
                                 data-quotation_validity="{{ $lead->quotation_validity }}"
-                                data-quotation_expiry_date="{{ $lead->quotation_expiry_date }}" {{--
-                                data-quotation_terms="{{ e(json_encode($lead->quotation_terms)) }}" --}} {{--
-                                data-quotation_terms="{{ $lead->quotation_terms ? htmlspecialchars($lead->quotation_terms, ENT_QUOTES) : '[]' }}"
-                                --}} data-quotation_notes="{{ ($lead->quotation_notes) }}"
+                                data-quotation_expiry_date="{{ $lead->quotation_expiry_date }}"
+                                data-quotation_terms="{{ htmlspecialchars(json_encode($lead->quotation_terms), ENT_QUOTES, 'UTF-8') }}"
+                                data-addcustomterms="{{ $lead->addcustomterms }}"
+                                data-quotation_notes="{{ ($lead->quotation_notes) }}"
                                 data-opened_at="{{ $lead->opened_at }}" data-toggle="modal"
                                 data-target="#qutationeditLeadsModal">
                                 <i class="fa fa-file-text-o"></i>
@@ -535,232 +534,190 @@
                                 </div>
                             </div>
 
-                            <!-- Product Rows Container -->
-                            <div id="products-container">
-                                <!-- Dynamic product rows will be added here -->
-                            </div>
 
-                            <!-- Summary Fields -->
-                            <div class="row mt-3">
-                                <div class="col-md-3">
-                                    <div class="form-group">
-                                        <label for="quotation_amount">Subtotal</label>
-                                        <div class="input-group">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text">₹</span>
+
+                            <!-- In your modal body -->
+                            <div class="modal-body">
+                                <!-- Add headings before dynamic product rows -->
+                                <div class="row mb-2">
+                                    <div class="col-md-3 text-center">Product Name</div>
+                                    <div class="col-md-2 text-center">Price (₹)</div>
+                                    <div class="col-md-1 text-center">Dis (%)</div>
+                                    <div class="col-md-1 text-center">Tax (%)</div>
+                                    <div class="col-md-4 text-center">Description</div>
+                                    <div class="col-md-1 text-center"></div>
+                                </div>
+
+                                <!-- Product Rows Container -->
+                                <div id="products-container">
+                                    <!-- Dynamic product rows will be added here -->
+                                </div>
+
+                                <!-- Summary Fields -->
+                                <div class="row mt-3">
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="quotation_amount">Subtotal</label>
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">₹</span>
+                                                </div>
+                                                <input type="number" id="quotation_amount" class="form-control"
+                                                    name="quotation_amount" step="0.01" min="0" readonly>
                                             </div>
-                                            <input type="number" id="quotation_amount" class="form-control"
-                                                name="quotation_amount" step="0.01" min="0" readonly>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="quotation_discount_amount">Total Discount</label>
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">₹</span>
+                                                </div>
+                                                <input type="number" id="quotation_discount_amount" class="form-control"
+                                                    name="quotation_discount" step="0.01" min="0" readonly>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="quotation_tax_amount">Total Tax</label>
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">₹</span>
+                                                </div>
+                                                <input type="number" id="quotation_tax_amount" class="form-control"
+                                                    name="quotation_tax" step="0.01" min="0" readonly>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="quotation_total">Grand Total</label>
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">₹</span>
+                                                </div>
+                                                <input type="number" id="quotation_total" class="form-control"
+                                                    name="quotation_total" step="0.01" min="0" readonly>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-md-3">
-                                    <div class="form-group">
-                                        <label for="quotation_discount_amount">Total Discount</label>
-                                        <div class="input-group">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text">₹</span>
-                                            </div>
-                                            <input type="number" id="quotation_discount_amount" class="form-control"
-                                                name="quotation_discount" step="0.01" min="0" readonly>
+
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="quotation_reference">Reference ID</label>
+                                            <input type="text" id="quotation_reference" class="form-control"
+                                                name="quotation_reference" required>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="quotation_validity">Quotation Validity (Days)</label>
+                                            <input type="number" id="quotation_validity" class="form-control"
+                                                name="quotation_validity" min="1" required>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="quotation_expiry_date">Quotation Expiry Date</label>
+                                            <input type="date" id="quotation_expiry_date" class="form-control"
+                                                name="quotation_expiry_date" required>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-md-3">
-                                    <div class="form-group">
-                                        <label for="quotation_tax_amount">Total Tax</label>
-                                        <div class="input-group">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text">₹</span>
-                                            </div>
-                                            <input type="number" id="quotation_tax_amount" class="form-control"
-                                                name="quotation_tax" step="0.01" min="0" readonly>
+
+
+                                <div class="form-group">
+                                    <label>Terms & Conditions</label>
+                                    <div class="terms-options">
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" name="terms[]" id="term1"
+                                                value="Installation by online/Offline, depending on client requirement.">
+                                            <label class="form-check-label" for="term1">
+                                                Installation by online/Offline, depending on client requirement.
+                                            </label>
+                                        </div>
+
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" name="terms[]" id="term2"
+                                                value="Visiting Client Place only @ Bangalore, Rest of Bangalore only online.">
+                                            <label class="form-check-label" for="term2">
+                                                Visiting Client Place only @ Bangalore, Rest of Bangalore only online.
+                                            </label>
+                                        </div>
+
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" name="terms[]" id="term3"
+                                                value="3">
+                                            <label class="form-check-label" for="term3">
+                                                Add-on will be provided @ Free of cost (According to the Plan).
+                                            </label>
+                                        </div>
+
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" name="terms[]" id="term4"
+                                                value="4">
+                                            <label class="form-check-label" for="term4">
+                                                Existing Customized Tools will be given @ 50% Discount.
+                                            </label>
+                                        </div>
+
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" name="terms[]" id="term5"
+                                                value="5">
+                                            <label class="form-check-label" for="term5">
+                                                Telephonic and remote support has always been the very strong point of
+                                                iSaral.
+                                            </label>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="form-group">
-                                        <label for="quotation_total">Grand Total</label>
-                                        <div class="input-group">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text">₹</span>
-                                            </div>
-                                            <input type="number" id="quotation_total" class="form-control"
-                                                name="quotation_total" step="0.01" min="0" readonly>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
 
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        <label for="quotation_reference">Reference ID</label>
-                                        <input type="text" id="quotation_reference" class="form-control"
-                                            name="quotation_reference" required>
-                                    </div>
-                                </div>
-
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        <label for="quotation_validity">Quotation Validity (Days)</label>
-                                        <input type="number" id="quotation_validity" class="form-control"
-                                            name="quotation_validity" min="1" required>
-                                    </div>
-                                </div>
-
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        <label for="quotation_expiry_date">Quotation Expiry Date</label>
-                                        <input type="date" id="quotation_expiry_date" class="form-control"
-                                            name="quotation_expiry_date" required>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {{-- <div class="form-group">
-                                <label>Terms & Conditions</label>
-                                <div class="terms-options">
-                                    <div class="form-check mb-2">
-                                        <input class="form-check-input" type="checkbox" name="terms[]" id="term1"
-                                            value="Installation by online/Offline, depending on client requirement.">
-                                        <label class="form-check-label" for="term1">
-                                            Installation by online/Offline, depending on client requirement.
-                                        </label>
+                                    <div class="custom-terms mt-3" style="display: none;">
+                                        <label for="additional_terms">Additional Terms</label>
+                                        <textarea id="additional_terms" class="form-control" name="additional_terms"
+                                            rows="3" placeholder="Enter any additional terms..."></textarea>
                                     </div>
 
-                                    <div class="form-check mb-2">
-                                        <input class="form-check-input" type="checkbox" name="terms[]" id="term2"
-                                            value="Visiting Client Place only @ Bangalore, Rest of Bangalore only online.">
-                                        <label class="form-check-label" for="term2">
-                                            Visiting Client Place only @ Bangalore, Rest of Bangalore only online.
-                                        </label>
-                                    </div>
-
-                                    <div class="form-check mb-2">
-                                        <input class="form-check-input" type="checkbox" name="terms[]" id="term3"
-                                            value="Add-on will be provided @ Free of cost (According to the Plan).">
-                                        <label class="form-check-label" for="term3">
-                                            Add-on will be provided @ Free of cost (According to the Plan).
-                                        </label>
-                                    </div>
-
-                                    <div class="form-check mb-2">
-                                        <input class="form-check-input" type="checkbox" name="terms[]" id="term4"
-                                            value="Existing Customized Tools will be given @ 50% Discount.">
-                                        <label class="form-check-label" for="term4">
-                                            Existing Customized Tools will be given @ 50% Discount.
-                                        </label>
-                                    </div>
-
-                                    <div class="form-check mb-2">
-                                        <input class="form-check-input" type="checkbox" name="terms[]" id="term5"
-                                            value="Telephonic and remote support has always been the very strong point of iSaral.">
-                                        <label class="form-check-label" for="term5">
-                                            Telephonic and remote support has always been the very strong point of
-                                            iSaral.
+                                    <div class="form-check mt-2">
+                                        <input class="form-check-input" type="checkbox" id="addCustomTerms">
+                                        <label class="form-check-label" for="addCustomTerms">
+                                            Add custom terms
                                         </label>
                                     </div>
                                 </div>
 
-                                <div class="custom-terms mt-3" style="display: none;">
-                                    <label for="additional_terms">Additional Terms</label>
-                                    <textarea id="additional_terms" class="form-control" name="additional_terms"
-                                        rows="3" placeholder="Enter any additional terms..."></textarea>
+
+
+                                <div class="form-group">
+                                    <label for="quotation_notes">Additional Notes</label>
+                                    <textarea id="quotation_notes" class="form-control" name="quotation_notes" rows="2"
+                                        required></textarea>
                                 </div>
-
-                                <div class="form-check mt-2">
-                                    <input class="form-check-input" type="checkbox" id="addCustomTerms">
-                                    <label class="form-check-label" for="addCustomTerms">
-                                        Add custom terms
-                                    </label>
-                                </div>
-                            </div> --}}
-                            <div class="form-group">
-                                <label>Terms & Conditions</label>
-                                <div class="terms-options">
-                                    <div class="form-check mb-2">
-                                        <input class="form-check-input" type="checkbox" name="terms[]" id="term1"
-                                            value="Installation by online/Offline, depending on client requirement.">
-                                        <label class="form-check-label" for="term1">
-                                            Installation by online/Offline, depending on client requirement.
-                                        </label>
-                                    </div>
-
-                                    <div class="form-check mb-2">
-                                        <input class="form-check-input" type="checkbox" name="terms[]" id="term2"
-                                            value="Visiting Client Place only @ Bangalore, Rest of Bangalore only online.">
-                                        <label class="form-check-label" for="term2">
-                                            Visiting Client Place only @ Bangalore, Rest of Bangalore only online.
-                                        </label>
-                                    </div>
-
-                                    <div class="form-check mb-2">
-                                        <input class="form-check-input" type="checkbox" name="terms[]" id="term3"
-                                            value="Add-on will be provided @ Free of cost (According to the Plan).">
-                                        <label class="form-check-label" for="term3">
-                                            Add-on will be provided @ Free of cost (According to the Plan).
-                                        </label>
-                                    </div>
-
-                                    <div class="form-check mb-2">
-                                        <input class="form-check-input" type="checkbox" name="terms[]" id="term4"
-                                            value="Existing Customized Tools will be given @ 50% Discount.">
-                                        <label class="form-check-label" for="term4">
-                                            Existing Customized Tools will be given @ 50% Discount.
-                                        </label>
-                                    </div>
-
-                                    <div class="form-check mb-2">
-                                        <input class="form-check-input" type="checkbox" name="terms[]" id="term5"
-                                            value="Telephonic and remote support has always been the very strong point of iSaral.">
-                                        <label class="form-check-label" for="term5">
-                                            Telephonic and remote support has always been the very strong point of
-                                            iSaral.
-                                        </label>
-                                    </div>
-                                </div>
-
-                                <div class="custom-terms mt-3" style="display: none;">
-                                    <label for="additional_terms">Additional Terms</label>
-                                    <textarea id="additional_terms" class="form-control" name="additional_terms"
-                                        rows="3" placeholder="Enter any additional terms..."></textarea>
-                                </div>
-
-                                <div class="form-check mt-2">
-                                    <input class="form-check-input" type="checkbox" id="addCustomTerms">
-                                    <label class="form-check-label" for="addCustomTerms">
-                                        Add custom terms
-                                    </label>
-                                </div>
-                            </div>
-
-
-
-                            <div class="form-group">
-                                <label for="quotation_notes">Additional Notes</label>
-                                <textarea id="quotation_notes" class="form-control" name="quotation_notes" rows="2"
-                                    required></textarea>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="form-group mt-3">
-                        <div class="form-check">
-                            <input type="checkbox" class="form-check-input" id="quotation_opened_at"
-                                name="quotation_opened_at" required>
-                            <label class="form-check-label" for="quotation_opened_at">
-                                By submitting the above information, you agree to take responsibility for attending the
-                                lead.
-                            </label>
+                        <div class="form-group mt-3">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="quotation_opened_at"
+                                    name="quotation_opened_at" required>
+                                <label class="form-check-label" for="quotation_opened_at">
+                                    By submitting the above information, you agree to take responsibility for attending
+                                    the
+                                    lead.
+                                </label>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                        <button type="button" id="sendEmailBtn" class="btn btn-success">Send Email</button>
-                        <button type="submit" class="btn btn-primary">Save Changes</button>
-                    </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                            <button type="button" id="sendEmailBtn" class="btn btn-success">Send Email</button>
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                        </div>
                 </form>
             </div>
         </div>
@@ -769,9 +726,6 @@
 
 
 </div>
-
-
-
 
 
 
@@ -861,32 +815,34 @@
                     </tbody>
                 </table>
             </div>
-            <div class="modal-footer">
+            {{-- <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">
                     {{ trans('global.close') }}
                 </button>
                 <form id="editQuotationForm" method="POST">
-                    {{-- @dd($lead->id); --}}
+
                     @csrf
                     <input type="hidden" value="1" name="mail_status" id="lead_id">
                     <button type="submit" class="btn btn-success">Send Email</button>
                 </form>
-            </div>
+            </div> --}}
 
         </div>
     </div>
 </div>
 
-
 @endsection
 
 @section('scripts')
 @parent
+<!-- jQuery (Latest version from jQuery CDN) -->
+{{-- <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script> --}}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+
+
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-<script src="https://cdn.ckeditor.com/4.16.2/standard/ckeditor.js"></script>
-
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.3/tinymce.min.js"></script>
 
 
 <script>
@@ -975,7 +931,6 @@
 
 // quotation
 
-$(document).ready(function() {
     // Initialize Select2 for product selection
     $('#quotation_product_ids').select2({
         placeholder: "Select Products",
@@ -985,9 +940,20 @@ $(document).ready(function() {
     });
 
     // Toggle custom terms textarea
-    $('#addCustomTerms').change(function() {
+    $('#addCustomTerms').change(function () {
         $('.custom-terms').toggle(this.checked);
     });
+
+     $('#quotation_validity').on('change', function () {
+        const days = parseInt($(this).val());
+        if (!isNaN(days)) {
+            const expiry = new Date();
+            expiry.setDate(expiry.getDate() + days);
+            $('#quotation_expiry_date').val(expiry.toISOString().split('T')[0]);
+        }
+    });
+
+
 
     // Container for product rows
     const $productsContainer = $('#products-container');
@@ -1024,74 +990,64 @@ $(document).ready(function() {
     });
 
     function updateProductRows() {
-        const selectedProducts = $('#quotation_product_ids').val() || [];
-        const existingProductIds = $('.product-row').map(function() {
-            return $(this).data('product-id').toString();
-        }).get();
+    const selectedProducts = $('#quotation_product_ids').val() || [];
+    const existingProductIds = $('.product-row').map(function() {
+        return $(this).data('product-id').toString();
+    }).get();
 
-        // Add new product rows only for products not already rendered
-        selectedProducts.forEach(productId => {
-            productId = productId.toString();
-            if (!existingProductIds.includes(productId)) {
-                const $selectedOption = $('#quotation_product_ids option[value="' + productId + '"]');
-                const productName = $selectedOption.text().split(' (₹')[0];
-                const defaultPrice = parseFloat($selectedOption.data('price')) || 0;
-                const defaultTax = parseFloat($selectedOption.data('tax')) || 0;
+    selectedProducts.forEach(productId => {
+        productId = productId.toString();
+        if (!existingProductIds.includes(productId)) {
+            const $selectedOption = $('#quotation_product_ids option[value="' + productId + '"]');
+            const productName = $selectedOption.text().split(' (₹')[0];
+            const defaultPrice = parseFloat($selectedOption.data('price')) || 0;
+            const defaultTax = parseFloat($selectedOption.data('tax')) || 0;
+            const defaultDescription = parseFloat($selectedOption.data('description')) || 0;
 
-                const $row = $(`
-                    <div class="product-row row mb-2" data-product-id="${productId}">
-                        <div class="col-md-4">
-                            <input type="text" class="form-control product-name" value="${productName}" readonly>
-                            <input type="hidden" class="product-id" name="products[${productId}][id]" value="${productId}">
-                        </div>
-                        <div class="col-md-2">
-                            <div class="input-group">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text">₹</span>
-                                </div>
-                                <input type="number" class="form-control product-price"
-                                       name="products[${productId}][price]"
-                                       value="${defaultPrice.toFixed(2)}" step="0.01" min="0">
-                            </div>
-                        </div>
-                        <div class="col-md-2">
-                            <div class="input-group">
-                                <input type="number" class="form-control product-discount"
-                                       name="products[${productId}][discount]"
-                                       value="0" min="0" max="100">
-                                <div class="input-group-append">
-                                    <span class="input-group-text">%</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-2">
-                            <div class="input-group">
-                                <input type="number" class="form-control product-tax"
-                                       name="products[${productId}][tax]"
-                                       value="${defaultTax}" min="0" max="100">
-                                <div class="input-group-append">
-                                    <span class="input-group-text">%</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-2">
-                            <button type="button" class="btn btn-danger remove-product">Remove</button>
-                        </div>
+            const $row = $(`
+                <div class="product-row row mb-2" data-product-id="${productId}">
+                    <div class="col-md-3">
+                        <input type="text" class="form-control product-name text-center" value="${productName}" readonly>
+                        <input type="hidden" class="product-id" name="products[${productId}][id]" value="${productId}">
                     </div>
-                `);
+                    <div class="col-md-2">
+                        <input type="number" class="form-control product-price"
+                               name="products[${productId}][price]"
+                               value="${defaultPrice.toFixed(2)}" step="0.01" min="0">
+                    </div>
+                    <div class="col-md-1">
+                        <input type="number" class="form-control product-discount"
+                               name="products[${productId}][discount]"
+                               value="0" min="0" max="100">
+                    </div>
+                    <div class="col-md-1">
+                        <input type="number" class="form-control product-tax"
+                               name="products[${productId}][tax]"
+                               value="${defaultTax}" min="0" max="100">
+                    </div>
+                    <div class="col-md-4">
+                        <textarea class="form-control product-description"
+                                  name="products[${productId}][description]"
+                                  placeholder="Product Description..."></textarea>
+                    </div>
+                    <div class="col-md-1">
+                        <button type="button" class="btn btn-danger remove-product"><i class="fa fa-trash"></i></button>
+                    </div>
+                </div>
+            `);
 
-                $productsContainer.append($row);
-            }
-        });
+            $('#products-container').append($row);
+        }
+    });
 
-        // Remove rows for products that are no longer selected
-        $('.product-row').each(function() {
-            const productId = $(this).data('product-id').toString();
-            if (!selectedProducts.includes(productId)) {
-                $(this).remove();
-            }
-        });
-    }
+    // Remove unselected
+    $('.product-row').each(function() {
+        const productId = $(this).data('product-id').toString();
+        if (!selectedProducts.includes(productId)) {
+            $(this).remove();
+        }
+    });
+}
 
     function calculateQuotationTotals() {
         let subtotal = 0;
@@ -1123,6 +1079,7 @@ $(document).ready(function() {
                 discount: discount,
                 tax: tax,
                 price_after_discount: priceAfterDiscount,
+                description: $row.find('.product-description').val(),
                 tax_amount: taxAmount,
                 total: priceAfterDiscount + taxAmount
             });
@@ -1142,8 +1099,11 @@ $(document).ready(function() {
 
     // Handle Edit Button Click for quotation edit
 $('.edit-quotation').on('click', function() {
+
+
     let leadId = $(this).data('id');
     let leadData = $(this).data();
+
 
     // Set the form action URL dynamically
     $('#editQuotationForm').attr('action', $('#editQuotationForm').attr('action').replace('__ID__', leadId));
@@ -1164,6 +1124,67 @@ $('.edit-quotation').on('click', function() {
     $('#quotation_reference').val(leadData.quotation_reference);
     $('#quotation_validity').val(leadData.quotation_validity);
     $('#quotation_notes').val(leadData.quotation_notes);
+ // Handle Terms & Conditions
+ function decodeHtmlEntities(str) {
+    const txt = document.createElement('textarea');
+    txt.innerHTML = str;
+    return txt.value;
+}
+
+try {
+
+    let quotationTermsRaw = leadData.quotation_terms || '[]';
+
+    // Step 1: Decode HTML entities (e.g. &quot;)
+    quotationTermsRaw = decodeHtmlEntities(quotationTermsRaw);
+
+    let quotationTerms;
+
+    // Step 2: Try parsing once
+    try {
+        quotationTerms = JSON.parse(quotationTermsRaw);
+
+        // Step 3: If still a string, parse again (double-encoded case)
+        if (typeof quotationTerms === 'string') {
+            quotationTerms = JSON.parse(quotationTerms);
+        }
+    } catch (parseError) {
+        console.error('Invalid quotation terms format:', parseError);
+        quotationTerms = [];
+    }
+
+
+    // Reset all checkboxes
+    $('.terms-options input[type="checkbox"]').prop('checked', false);
+
+    // Check matching predefined terms
+    quotationTerms.forEach(term => {
+        const $checkbox = $(`.terms-options input[value="${term}"]`);
+        if ($checkbox.length) {
+            $checkbox.prop('checked', true);
+        }
+    });
+
+    // Extract custom terms
+    const customTerms = quotationTerms.filter(term =>
+        !$(`.terms-options input[value="${term}"]`).length
+    );
+
+    if (customTerms.length > 0) {
+        $('#addCustomTerms').prop('checked', true);
+        $('.custom-terms').show();
+        $('#additional_terms').val(customTerms.join('\n'));
+    } else {
+        $('#addCustomTerms').prop('checked', false);
+        $('.custom-terms').hide();
+        $('#additional_terms').val('');
+    }
+
+} catch (e) {
+    console.error('Unexpected error:', e);
+}
+
+
 
     // Set expiry date if it exists
     if (leadData.quotation_expiry_date && leadData.quotation_expiry_date !== '0000-00-00') {
@@ -1173,6 +1194,7 @@ $('.edit-quotation').on('click', function() {
             $('#quotation_expiry_date').val(formattedDate);
         }
     }
+
 
     // Fetch selected products via AJAX
     $.ajax({
@@ -1192,49 +1214,42 @@ $('.edit-quotation').on('click', function() {
                 // If we have detailed product info, populate the rows
                 if (response.product_details && response.product_details.length > 0) {
                     response.product_details.forEach(product => {
-                        const $row = $(`
+                         const $row = $(`
                             <div class="product-row row mb-2" data-product-id="${product.id}">
+                                <div class="col-md-3">
+                                    <input type="text" class="form-control product-name text-center"
+                                        value="${product.name}" readonly>
+                                    <input type="hidden" class="product-id"
+                                        name="products[${product.id}][id]" value="${product.id}">
+                                </div>
+                                <div class="col-md-2">
+                                    <input type="number" class="form-control product-price"
+                                        name="products[${product.id}][price]"
+                                        value="${parseFloat(product.price).toFixed(2)}"
+                                        step="0.01" min="0">
+                                </div>
+                                <div class="col-md-1">
+                                    <input type="number" class="form-control product-discount"
+                                        name="products[${product.id}][discount]"
+                                        value="${product.discount || 0}" min="0" max="100">
+                                </div>
+                                <div class="col-md-1">
+                                    <input type="number" class="form-control product-tax"
+                                        name="products[${product.id}][tax]"
+                                        value="${product.tax || 0}" min="0" max="100">
+                                </div>
                                 <div class="col-md-4">
-                                    <input type="text" class="form-control product-name" value="${product.name}" readonly>
-                                    <input type="hidden" class="product-id" name="products[${product.id}][id]" value="${product.id}">
+                                    <textarea class="form-control product-description"
+                                            name="products[${product.id}][description]"
+                                            placeholder="Product Description...">${product.description || ''}</textarea>
                                 </div>
-                                <div class="col-md-2">
-                                    <div class="input-group">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text">₹</span>
-                                        </div>
-                                        <input type="number" class="form-control product-price"
-                                               name="products[${product.id}][price]"
-                                               value="${product.price.toFixed(2)}" step="0.01" min="0">
-                                    </div>
-                                </div>
-                                <div class="col-md-2">
-                                    <div class="input-group">
-                                        <input type="number" class="form-control product-discount"
-                                               name="products[${product.id}][discount]"
-                                               value="${product.discount || 0}" min="0" max="100">
-                                        <div class="input-group-append">
-                                            <span class="input-group-text">%</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-2">
-                                    <div class="input-group">
-                                        <input type="number" class="form-control product-tax"
-                                               name="products[${product.id}][tax]"
-                                               value="${product.tax}" min="0" max="100">
-                                        <div class="input-group-append">
-                                            <span class="input-group-text">%</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-2">
-                                    <button type="button" class="btn btn-danger remove-product">Remove</button>
+                                <div class="col-md-1">
+                                    <button type="button" class="btn btn-danger remove-product"><i class="fa fa-trash"></i></button>
                                 </div>
                             </div>
                         `);
 
-                        $productsContainer.append($row);
+                        $('#products-container').append($row);
                     });
                 }
 
@@ -1246,80 +1261,6 @@ $('.edit-quotation').on('click', function() {
         }
     });
 
-    // Set terms checkboxes - FIXED THIS SECTION
-//     if (leadData.quotation_terms) {
-//         try {
-//             // First uncheck all terms checkboxes
-//             $('input[name="terms[]"]').prop('checked', false);
-
-//             // Parse the terms JSON
-//             let terms = [];
-//             if (typeof leadData.quotation_terms === 'string') {
-//                 terms = JSON.parse(leadData.quotation_terms);
-//             } else if (Array.isArray(leadData.quotation_terms)) {
-//                 terms = leadData.quotation_terms;
-//             }
-
-//             // Check the appropriate checkboxes
-//             terms.forEach(term => {
-//                 // Check standard terms
-//                 let found = false;
-//                 $('input[name="terms[]"]').each(function() {
-//                     if ($(this).val() === term) {
-//                         $(this).prop('checked', true);
-//                         found = true;
-//                     }
-//                 });
-
-//                 // Check if term is custom
-//                 if (!found && term) {
-//                     $('#addCustomTerms').prop('checked', true).trigger('change');
-//                     $('#additional_terms').val(term);
-//                 }
-//             });
-//         } catch (e) {
-//             console.error('Error parsing terms:', e);
-//         }
-//     } else {
-//         // No terms - uncheck all
-//         $('input[name="terms[]"]').prop('checked', false);
-//         $('#addCustomTerms').prop('checked', false).trigger('change');
-//         $('#additional_terms').val('');
-//     }
-
-//     // Handle checkbox
-//     let openedAt = leadData.openedAt;
-//     if (openedAt && openedAt !== 'null' && openedAt !== null && openedAt !== '0000-00-00 00:00:00') {
-//         $('#quotation_opened_at').prop('checked', true);
-//     } else {
-//         $('#quotation_opened_at').prop('checked', false);
-//     }
-// });
-
- // Set terms checkboxes
-        if (leadData.quotation_terms) {
-            try {
-                const terms = JSON.parse(leadData.quotation_terms.replace(/&quot;/g, '"'));
-                terms.forEach(term => {
-                    // Check standard terms
-                    let found = false;
-                    $('input[name="terms[]"]').each(function() {
-                        if ($(this).val() === term) {
-                            $(this).prop('checked', true);
-                            found = true;
-                        }
-                    });
-
-                    // Check if term is custom
-                    if (!found) {
-                        $('#addCustomTerms').prop('checked', true).trigger('change');
-                        $('#additional_terms').val(term);
-                    }
-                });
-            } catch (e) {
-                console.error('Error parsing terms:', e);
-            }
-        }
 
         // Handle checkbox
         let openedAt = leadData.openedAt;
@@ -1330,82 +1271,134 @@ $('.edit-quotation').on('click', function() {
         }
     });
 
-    // Handle form submission
-    $('#editQuotationForm').on('submit', function(e) {
-        e.preventDefault();
 
-        const form = $(this);
-        const url = form.attr('action');
-        const formData = form.serialize();
+    // Submit Form via AJAX on "Save Changes"
+$('#editQuotationForm').on('submit', function(e) {
+    e.preventDefault(); // Important to prevent page reload
+    let form = $(this);
+    let formData = new FormData(this);
 
-        $.ajax({
-            url: url,
-            type: 'POST',
-            data: formData,
-            success: function(response) {
-                if (response.success) {
-                    // $('#qutationeditLeadsModal').modal('hide');
-                    window.location.reload();
-                }
-            },
-            error: function(xhr) {
-                console.error('Error saving quotation');
+    $.ajax({
+        url: form.attr('action'),
+        method: form.attr('method'),
+        data: formData,
+        contentType: false,
+        processData: false,
+        success: function(response) {
+            if (response.success) {
+                alert(response.message);
+                location.reload(); // Or update table dynamically
+            } else {
+                alert(response.message);
             }
-        });
-    });
-
-    // Handle Send Email button click
-    $('#sendEmailBtn').on('click', function() {
-        const leadId = $('#quotation_edit_id').val();
-        const email = $('#quotation_edit_email').val();
-
-        if (!email) {
-            alert('Please enter an email address before sending.');
-            return;
-        }
-
-        // First save the form
-        const form = $('#editQuotationForm');
-        const url = form.attr('action');
-        const formData = form.serialize() + '&send_email=true';
-
-        $.ajax({
-            url: url,
-            type: 'POST',
-            data: formData,
-            success: function(response) {
-
-                if (response.success) {
-                    if (response.pdf_url) {
-                        // Open PDF in new tab
-                        window.open(response.pdf_url, '_blank');
-                    }
-                    window.location.reload();
-                    $('#qutationeditLeadsModal').modal('hide');
-                } else {
-                    alert(response.message);
-                }
-            },
-            error: function(xhr) {
-                alert('Error saving quotation before sending email');
-            }
-        });
-    });
-
-    // Set expiry date based on validity days
-    $('#quotation_validity').on('change', function() {
-        const validityDays = parseInt($(this).val());
-        if (validityDays && validityDays > 0) {
-            const today = new Date();
-            const expiryDate = new Date(today.setDate(today.getDate() + validityDays));
-            const formattedDate = expiryDate.toISOString().split('T')[0];
-            $('#quotation_expiry_date').val(formattedDate);
+        },
+        error: function(xhr) {
+            alert("Error: " + (xhr.responseJSON?.message || 'Failed to save.'));
+        },
+        complete: function() {
+            $('#sendEmailBtn').prop('disabled', false).text('Send Email');
         }
     });
 });
 
+$('#sendEmailBtn').on('click', function () {
+    const leadId = $('#quotation_edit_id').val();
+    const email = $('#quotation_edit_email').val();
+    const $btn = $(this);
+    const $spinner = $('#emailSpinner');
+    const form = $('#editQuotationForm');
+
+    if (!email) {
+        alert('Please enter an email address.');
+        return;
+    }
+
+    const formData = form.serialize() + '&send_email=1';
+
+    $btn.prop('disabled', true).text('Sending...');
+    $spinner.removeClass('d-none');
+
+    alert('email will send soon..');
+     $('#qutationeditLeadsModal [data-dismiss="modal"]').trigger('click');
+
+    $.ajax({
+        url: form.attr('action').replace('__ID__', leadId), // Replace dynamic ID in URL
+        type: 'POST',
+        data: formData,
+        success: function (response) {
+            $btn.prop('disabled', false).text('Send Email');
+            $spinner.addClass('d-none');
+
+            if (response.success) {
+                console.log(response.message);
+            } else {
+                alert('Failed: ' + response.message);
+            }
+        },
+        error: function (xhr) {
+            $btn.prop('disabled', false).text('Send Email');
+            $spinner.addClass('d-none');
+            console.error('Error:', xhr.responseText);
+            // alert('Error while sending email.');
+        }
+    });
+
+});
+
+//     $('#sendEmailBtn').on('click', function() {
+//     const leadId = $('#quotation_edit_id').val();
+//     const email = $('#quotation_edit_email').val();
+//     if (!email) {
+//         alert('Please enter an email address.');
+//         return;
+//     }
+
+//     const $btn = $(this);
+//     const $spinner = $('#emailSpinner');
+
+//     // Show spinner
+//     $btn.prop('disabled', true);
+//     $spinner.removeClass('d-none');
+
+//     const form = $('#editQuotationForm');
+//     const url = form.attr('action');
+//     const formData = form.serialize() + '&send_email=true';
+
+//     $.ajax({
+//         // url: "{{ url('quotations/send-quotation-email') }}/" + leadId,
+//          url: form.attr('action'),
+//         type: 'POST',
+//         data: formData,
+//           beforeSend: function() {
+//             $('#sendEmailBtn').prop('disabled', true).text('Sending...');
+//         },
+//         success: function(response) {
+//             $btn.prop('disabled', false);
+//             $spinner.addClass('d-none');
+
+//             if (response.success) {
+//                 if (response.pdf_url) {
+//                     window.open(response.pdf_url, '_blank');
+//                 }
+//                 location.reload(); // Or refresh datatable
+//             } else {
+//                 alert(response.message || 'Failed to send email.');
+//             }
+//         },
+//         error: function(xhr) {
+//             $btn.prop('disabled', false);
+//             $spinner.addClass('d-none');
+//             alert('Error while sending email.');
+//             console.error(xhr.responseText);
+//         }
+//     });
+// });
 
 
+
+
+
+// EDIT
            // Initialize Select2
            $('#product_idss').select2({
                 placeholder: "Select Products",

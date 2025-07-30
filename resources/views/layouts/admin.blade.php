@@ -22,7 +22,8 @@
     <!-- responsive css -->
     <link rel="stylesheet" href="{{ asset('backend/css/responsive.css') }}" />
     <!-- color css -->
-    <link rel="stylesheet" href="{{ asset('backend/css/colors.css') }}" />
+    {{--
+    <link rel="stylesheet" href="{{ asset('backend/css/colors.css') }}" /> --}}
     <!-- select bootstrap -->
     <link rel="stylesheet" href="{{ asset('backend/css/bootstrap-select.css') }}" />
     <!-- scrollbar css -->
@@ -39,6 +40,9 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.0/css/buttons.bootstrap5.min.css">
     {{-- multiselect --}}
     <!-- Include Select2 CSS -->
+    <!-- jQuery (Latest version from jQuery CDN) -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
     {{-- today --}}
@@ -64,14 +68,16 @@
                                     class="fa fa-bars"></i></button>
                             <div class="logo_section">
                                 <a href="{{ '/home' }}">
-                                    <img class="img-responsive"
-                                        src="{{ asset('backend/images/logo/logo.png') }}" alt="#" />
-                                    </a>
+                                    <img class="img-responsive" src="{{ asset('backend/images/logo/logo.png') }}"
+                                        alt="#" />
+                                </a>
                             </div>
                             <div class="right_topbar">
                                 <div class="icon_info">
                                     <ul>
-                                        <li><a href="{{ route('admin.leads.index') }}" title="Total Leads"><i class="fa fa-bell-o"></i><span class="badge" title="Total Leads"> {{ $todayLeads }}</span></a></li>
+                                        <li><a href="{{ route('admin.leads.index') }}" title="Total Leads"><i
+                                                    class="fa fa-bell-o"></i><span class="badge" title="Total Leads"> {{
+                                                    $todayLeads }}</span></a></li>
                                         {{-- <li>
                                             <a href="{{ route('admin.leads.index') }}" title="Today's Leads">
                                                 <i class="fa fa-question-circle"></i>
@@ -82,47 +88,50 @@
                                         <li>
                                             <a href="{{ route('admin.leads.index') }}" title="Not Opened Leads">
                                                 <i class="fa fa-thumbs-up"></i>
-                                                <span class="badge" title="Not Opened Leads">{{ $openedLeadsNull }}</span>
+                                                <span class="badge" title="Not Opened Leads">{{ $openedLeadsNull
+                                                    }}</span>
                                             </a>
                                         </li>
 
                                         <li>
                                             <a href="{{ route('admin.leads.index') }}" title="Opened Leads">
                                                 <i class="fa fa-thumbs-down"></i>
-                                                <span class="badge" title="Opened Leads">{{ $openedLeadsNotNull }}</span>
+                                                <span class="badge" title="Opened Leads">{{ $openedLeadsNotNull
+                                                    }}</span>
                                             </a>
                                         </li>
-                                    @else
+                                        @else
                                         <li>
                                             <a href="{{ route('admin.our-leads.index') }}" title="Not Opened Leads">
                                                 <i class="fa fa-thumbs-up"></i>
-                                                <span class="badge" title="Not Opened Leads">{{ $openedLeadsNull }}</span>
+                                                <span class="badge" title="Not Opened Leads">{{ $openedLeadsNull
+                                                    }}</span>
                                             </a>
                                         </li>
 
                                         <li>
                                             <a href="{{ route('admin.our-leads.index') }}" title="Opened Leads">
                                                 <i class="fa fa-thumbs-down"></i>
-                                                <span class="badge" title="Opened Leads">{{ $openedLeadsNotNull }}</span>
+                                                <span class="badge" title="Opened Leads">{{ $openedLeadsNotNull
+                                                    }}</span>
                                             </a>
                                         </li>
-                                    @endif
+                                        @endif
 
 
                                     </ul>
                                     <ul class="user_profile_dd">
                                         <li>
                                             <a class="dropdown-toggle" data-toggle="dropdown">
-                                                {{-- <img
-                                                    class="img-responsive rounded-circle"
+                                                {{-- <img class="img-responsive rounded-circle"
                                                     src="{{ auth()->user()->profile_image ? asset('storage/' . auth()->user()->profile_image) : asset('backend/images/layout_img/user_img.jpg') }}"
                                                     alt="User Image" /> --}}
 
-                                                    <img class="img-responsive rounded-circle"
+                                                <img class="img-responsive rounded-circle"
                                                     src="{{ auth()->user()->profile_image ? asset(auth()->user()->profile_image) : asset('backend/images/layout_img/user_img.jpg') }}"
                                                     alt="User Image" />
 
-                                                    <span class="name_user"> Welcome,
+                                                <span class="name_user"> Welcome,
                                                     {{ auth()->user()->name }}</span></a>
                                             <div class="dropdown-menu">
                                                 <a class="dropdown-item" href="{{ route('profile.password.edit') }}">My
@@ -146,8 +155,10 @@
                                                     <i class="fa-fw fas fa-user"></i> &nbsp; cc
                                                 </a>
 
-                                                <a class="dropdown-item" href="{{ route('profile.password.change-password') }}">
-                                                    <i class="fa-fw fas fa-key"></i> &nbsp; {{ trans('global.change_password') }}
+                                                <a class="dropdown-item"
+                                                    href="{{ route('profile.password.change-password') }}">
+                                                    <i class="fa-fw fas fa-key"></i> &nbsp; {{
+                                                    trans('global.change_password') }}
                                                 </a>
 
                                                 <a href="#" class="dropdown-item"
